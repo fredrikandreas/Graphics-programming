@@ -1,6 +1,6 @@
 # Specify the minimum version of CMake that is required to process this file.
 # This command is used to ensure that a certain set of CMake features is available to the build.
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.0...3.20 FATAL_ERROR)
 
 # Declare the name of the project and set it as 'PROG2002'. This command is used to set the project name
 # and optionally its version, description, and other attributes.
@@ -64,7 +64,7 @@ add_subdirectory(examples/example_5)
 
 # Add a subdirectory for a labs. This line is commented out, possibly because the
 # labs is either under development or optional.
-# add_subdirectory(labs)
+add_subdirectory(labs/lab1)
 
 # Add a subdirectory for a framework. This line is commented out, possibly because the
 # framework is either under development or optional.
