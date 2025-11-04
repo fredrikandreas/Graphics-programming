@@ -108,9 +108,14 @@ int main(int argc, char** argv)
         #version 410 core
         
         out vec4 color;
+        uniform float time;
+
         void main()
         {
-            color = vec4(1.0, 1.0, 1.0, 1.0);
+            float r = (sin(time) + 1.0) * 0.5;
+            float g = (sin(time + 2.0) + 1.0) * 0.5;
+            float b = (sin(time + 4.0) + 1.0) * 0.5;
+            color = vec4(r, g, b, 1.0);
         }
     )";
     
@@ -141,6 +146,7 @@ int main(int argc, char** argv)
     glUseProgram(shaderProgram);
 
     GLint offsetLocation = glGetUniformLocation(shaderProgram, "offset");
+    GLint timeLocation = glGetUniformLocation(shaderProgram, "time");
 
     glClearColor(0.5f, 0.0f, 0.0f, 1.0f);
 
@@ -148,6 +154,9 @@ int main(int argc, char** argv)
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
+
+        float t = glfwGetTime(); // Time in seconds since program start
+        glUniform1f(timeLocation, t);
 
         // Draw triangle
         glBindVertexArray(vertexArrayId);
