@@ -1,8 +1,15 @@
 // #include area (SECTION 1)
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <GLFWApplication.h>
 
 #include <iostream>
+
+char *APP_NAME = "Lab_1";
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 800;
+const int V_MAJOR = 4;
+const int V_MINOR = 1;
 
 struct GLFWwindow;
 
@@ -10,34 +17,11 @@ int main(int argc, char **argv)
 {
     std::cout << "Hello World!" << std::endl;
 
-    // GLFW initialization code (SECTION 2)
-    if (!glfwInit())
-    {
-        std::cout << "Failed to initialize GLFW" << std::endl;
-        return -1;
-    }
-
-    // OpenGL initialization code (SECTION 3)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    // GLFW initialization code (SECTION 2) and OpenGL initialization code (SECTION 3)
+    GLFWApplication app = GLFWApplication(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
 
     // OpenGL data transfer code (SECTION 4)
-    GLFWwindow *window = glfwCreateWindow(800, 800, "Lab 1", nullptr, nullptr);
-    if (!window)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-
-    // Load OpenGL function pointers using GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
+    GLFWwindow *window = app.Init();
 
     // Drawing Geometric Objects in OpenGL
     // Create a triangle
@@ -167,13 +151,12 @@ int main(int argc, char **argv)
         glUniform2f(offsetLocation, 0.5f, 0.0f); // shift to the right
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        app.Swap(window);
+        app.Poll();
     }
 
     // Termination code (SECTION 6)
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    app.Destroy(window);
 
     return 0;
 }
