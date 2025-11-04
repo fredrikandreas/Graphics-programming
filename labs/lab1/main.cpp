@@ -2,10 +2,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <GLFWApplication.h>
+#include <GeometricTools.h>
 
 #include <iostream>
 
-char *APP_NAME = "Lab_1";
+const char *APP_NAME = "Lab 1";
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 800;
 const int V_MAJOR = 4;
@@ -25,10 +26,7 @@ int main(int argc, char **argv)
 
     // Drawing Geometric Objects in OpenGL
     // Create a triangle
-    float triangle[3 * 2] = {// 3 vertices x 2 coordinate components
-                             -0.5f, -0.5f,
-                             0.5f, -0.5f,
-                             0.0f, 0.5f};
+    auto triangle = GeometricTools::UnitTriangle2D;
 
     // Create a vertex array
     GLuint vertexArrayId;
@@ -41,22 +39,14 @@ int main(int argc, char **argv)
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 
     // Populate the vertex buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle.data(), GL_STATIC_DRAW);
 
     // Set the layout of the bound buffer
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
     glEnableVertexAttribArray(0);
 
     // Create a square (two traingles forming a square)
-    float square[] = {
-        // First triangle
-        -0.5f, 0.5f,
-        0.5f, 0.5f,
-        -0.5f, -0.5f,
-        // Second triangle
-        0.5f, 0.5f,
-        0.5f, -0.5f,
-        -0.5f, -0.5f};
+    auto square = GeometricTools::UnitSquare2D;
 
     // Create a vertex array
     GLuint squareVAO;
@@ -69,7 +59,7 @@ int main(int argc, char **argv)
     glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
 
     // Populate the vertex buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(square), square.data(), GL_STATIC_DRAW);
 
     // Set the layout of the bound buffer
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
