@@ -66,6 +66,11 @@ namespace GeometricTools
         {
             return vertices;
         }
+
+        int GetVertexCount() const
+        {
+            return TotalVertices;
+        }
     };
 
     template <int DivX, int DivY>
