@@ -18,14 +18,13 @@ int main(int argc, char **argv)
 {
     std::cout << "Hello World!" << std::endl;
 
-    // GLFW initialization code (SECTION 2) and OpenGL initialization code (SECTION 3)
+    // GLFW initialization code and OpenGL initialization code (SECTION 2) + (SECTION 3)
     GLFWApplication app = GLFWApplication(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
 
     // OpenGL data transfer code (SECTION 4)
     GLFWwindow *window = app.Init();
 
     // Drawing Geometric Objects in OpenGL
-    // Create a triangle
     auto triangle = GeometricTools::UnitTriangle2D;
 
     // Create a vertex array
@@ -45,7 +44,6 @@ int main(int argc, char **argv)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
     glEnableVertexAttribArray(0);
 
-    // Create a square (two traingles forming a square)
     auto square = GeometricTools::UnitSquare2D;
 
     // Create a vertex array
