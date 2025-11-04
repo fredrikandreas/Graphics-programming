@@ -6,7 +6,7 @@
 
 struct GLFWwindow;
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     std::cout << "Hello World!" << std::endl;
 
@@ -24,8 +24,8 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     // OpenGL data transfer code (SECTION 4)
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Lab 2", nullptr, nullptr);
-    if (!window) 
+    GLFWwindow *window = glfwCreateWindow(800, 800, "Lab 1", nullptr, nullptr);
+    if (!window)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         return -1;
@@ -33,18 +33,18 @@ int main(int argc, char** argv)
     glfwMakeContextCurrent(window);
 
     // Load OpenGL function pointers using GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
     // Drawing Geometric Objects in OpenGL
     // Create a triangle
-    float triangle[3*2] = { // 3 vertices x 2 coordinate components
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.0f,  0.5f
-    };
+    float triangle[3 * 2] = {// 3 vertices x 2 coordinate components
+                             -0.5f, -0.5f,
+                             0.5f, -0.5f,
+                             0.0f, 0.5f};
 
     // Create a vertex array
     GLuint vertexArrayId;
@@ -60,20 +60,19 @@ int main(int argc, char** argv)
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
     // Set the layout of the bound buffer
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
     glEnableVertexAttribArray(0);
 
     // Create a square (two traingles forming a square)
     float square[] = {
         // First triangle
-        -0.5f,  0.5f,
-         0.5f,  0.5f,
+        -0.5f, 0.5f,
+        0.5f, 0.5f,
         -0.5f, -0.5f,
         // Second triangle
-         0.5f,  0.5f,
-         0.5f, -0.5f,
-        -0.5f, -0.5f
-    };
+        0.5f, 0.5f,
+        0.5f, -0.5f,
+        -0.5f, -0.5f};
 
     // Create a vertex array
     GLuint squareVAO;
@@ -89,7 +88,7 @@ int main(int argc, char** argv)
     glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
 
     // Set the layout of the bound buffer
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
     glEnableVertexAttribArray(0);
 
     const std::string vertexShaderSrc = R"(
@@ -118,16 +117,16 @@ int main(int argc, char** argv)
             color = vec4(r, g, b, 1.0);
         }
     )";
-    
+
     // Compile the vertex shader
     auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const GLchar* vss = vertexShaderSrc.c_str();
+    const GLchar *vss = vertexShaderSrc.c_str();
     glShaderSource(vertexShader, 1, &vss, nullptr);
     glCompileShader(vertexShader);
 
     // Compile the fragment shader
     auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar* fss = fragmentShaderSrc.c_str();
+    const GLchar *fss = fragmentShaderSrc.c_str();
     glShaderSource(fragmentShader, 1, &fss, nullptr);
     glCompileShader(fragmentShader);
 
@@ -138,7 +137,7 @@ int main(int argc, char** argv)
 
     glLinkProgram(shaderProgram);
 
-    // Shader objects can be deleted once they 
+    // Shader objects can be deleted once they
     // have been linked in a shader program
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
