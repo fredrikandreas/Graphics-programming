@@ -39,12 +39,13 @@ int main(int argc, char** argv)
     }
 
     // Drawing Geometric Objects in OpenGL
+    // Create a triangle
     float triangle[3*2] = { // 3 vertices x 2 coordinate components
         -0.5f, -0.5f,
-        0.5f, -0.5f,
-        0.0f,  0.5f
+         0.5f, -0.5f,
+         0.0f,  0.5f
     };
-    
+
     // Create a vertex array
     GLuint vertexArrayId;
     glGenVertexArrays(1, &vertexArrayId);
@@ -62,14 +63,44 @@ int main(int argc, char** argv)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, nullptr);
     glEnableVertexAttribArray(0);
 
+    // Create a square (two traingles forming a square)
+    float square[] = {
+        // First triangle
+        -0.5f,  0.5f,
+         0.5f,  0.5f,
+        -0.5f, -0.5f,
+        // Second triangle
+         0.5f,  0.5f,
+         0.5f, -0.5f,
+        -0.5f, -0.5f
+    };
+
+    // Create a vertex array
+    GLuint squareVAO;
+    glGenVertexArrays(1, &squareVAO);
+    glBindVertexArray(squareVAO);
+
+    // Create a vertex buffer
+    GLuint squareVBO;
+    glGenBuffers(1, &squareVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, squareVBO);
+
+    // Populate the vertex buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
+
+    // Set the layout of the bound buffer
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float)*2, nullptr);
+    glEnableVertexAttribArray(0);
+
     const std::string vertexShaderSrc = R"(
         #version 410 core
         
         layout(location = 0) in vec2 position;
+        uniform vec2 offset;   // Shift in X and Y position
         
         void main()
         {
-            gl_Position = vec4(position, 0.0, 1.0); // Homogeneous coordinates 3D+1
+            gl_Position = vec4(position + offset, 0.0, 1.0); // Homogeneous coordinates 3D+1
         }
     )";
 
@@ -109,15 +140,26 @@ int main(int argc, char** argv)
 
     glUseProgram(shaderProgram);
 
+    GLint offsetLocation = glGetUniformLocation(shaderProgram, "offset");
+
     glClearColor(0.5f, 0.0f, 0.0f, 1.0f);
 
     // Application loop code (SECTION 5)
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glfwSwapBuffers(window);
 
+        // Draw triangle
+        glBindVertexArray(vertexArrayId);
+        glUniform2f(offsetLocation, -0.5f, 0.0f); // shift to the left
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        // Draw square
+        glBindVertexArray(squareVAO);
+        glUniform2f(offsetLocation, 0.5f, 0.0f); // shift to the right
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
