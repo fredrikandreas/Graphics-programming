@@ -66,7 +66,7 @@ namespace GeometricTools
         {
             return vertices;
         }
-    }
+    };
 
     template <int DivX, int DivY>
     class UnitGridTopologyTriangles
