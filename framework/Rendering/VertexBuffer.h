@@ -2,6 +2,7 @@
 #define VERTEXBUFFER_H_
 
 #include <glad/glad.h>
+#include "BufferLayout.h"
 
 class VertexBuffer
 {
@@ -27,6 +28,7 @@ public:
 
 private:
   GLuint VertexBufferID;
+  BufferLayout Layout;
 };
 
 #endif // VERTEXBUFFER_H_

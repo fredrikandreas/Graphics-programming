@@ -1,4 +1,7 @@
+#include <glad/glad.h>
 #include "ShadersDataTypes.h"
+#include <vector>
+#include <string>
 
 struct BufferAttribute
 {
