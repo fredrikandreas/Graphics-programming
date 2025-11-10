@@ -20,6 +20,11 @@ public:
   // Fill a specific segment of the buffer specified by an offset and size with data.
   void BufferSubData(GLintptr offset, GLsizeiptr size, const void *data) const;
 
+  // Set/Get buffer layout
+  const BufferLayout& GetLayout() const { return Layout; }
+
+  void SetLayout(const BufferLayout& layout) { Layout = layout; }
+
 private:
   GLuint VertexBufferID;
 };
