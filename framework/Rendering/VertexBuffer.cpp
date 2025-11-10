@@ -1,5 +1,4 @@
 #include "VertexBuffer.h"
-#include <glad/glad.h>
 
 VertexBuffer::VertexBuffer(const void *vertices, GLsizei size)
 {
