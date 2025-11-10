@@ -1,5 +1,5 @@
 # Create GLFWApplication library
-add_library(Rendering ShadersDataType.h VertexBuffer.h)
+add_library(Rendering ShadersDataType.h VertexBuffer.h VertexBuffer.cpp)
 
 # Create alias so it can be used as Framework::GLFWApplication
 add_library(Framework::Rendering ALIAS Rendering)
