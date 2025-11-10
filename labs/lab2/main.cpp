@@ -5,9 +5,11 @@
 #include <GeometricTools.h>
 #include <VertexBuffer.h>
 #include <IndexBuffer.h>
+#include <VertexArray.h>
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "shaders.h"
 
@@ -40,64 +42,31 @@ int main(int argc, char **argv)
     GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc);
     GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
     GLuint prog = glCreateProgram();
+
     glAttachShader(prog, vs);
     glAttachShader(prog, fs);
     glLinkProgram(prog);
+
     glDeleteShader(vs);
     glDeleteShader(fs);
 
-    // Generate positions + UVs for a (DivX+1) x (DivY+1) grid
-    // layout: [pos.x, pos.y, uv.x, uv.y]
-    std::vector<float> verts;
-    verts.reserve((GRID_COLS + 1) * (GRID_ROWS + 1) * 4);
+    GeometricTools::UnitGridGeometry2D<GRID_COLS, GRID_ROWS> geometry;
+    GeometricTools::UnitGridTopologyTriangles<GRID_COLS, GRID_ROWS> topology;
+    const auto &gridGeometry = geometry.GetGrid();
+    const auto &gridTopology = topology.GetIndices();
 
-    for (int y = 0; y <= GRID_ROWS; ++y)
-    {
-        float v = float(y) / float(GRID_ROWS); // 0..1
-        float py = -1.0f + 2.0f * v;           // -1..1
-        for (int x = 0; x <= GRID_COLS; ++x)
-        {
-            float u = float(x) / float(GRID_COLS); // 0..1
-            float px = -1.0f + 2.0f * u;           // -1..1
-            verts.push_back(px);
-            verts.push_back(py);
-            verts.push_back(u);
-            verts.push_back(v);
-        }
-    }
+    // Create buffers and arrays
+    auto gridIndexBuffer = std::make_shared<IndexBuffer>(gridTopology.data(), gridTopology.size());
+    auto gridBufferLayout = BufferLayout({{ShaderDataType::Float2, "position"}});
+    auto gridVertexBuffer = std::make_shared<VertexBuffer>(gridGeometry.data(), gridGeometry.size() * sizeof(gridGeometry[0]));
+    gridVertexBuffer->SetLayout(gridBufferLayout);
+    auto vertexArray = std::make_shared<VertexArray>();
+    vertexArray->AddVertexBuffer(gridVertexBuffer);
+    vertexArray->SetIndexBuffer(gridIndexBuffer);
 
-    using Topo = GeometricTools::UnitGridTopologyTriangles<GRID_COLS, GRID_ROWS>;
-    Topo topology;
-
-    const auto& idx = topology.GetIndices();
-    const GLsizei indexCount = static_cast<GLsizei>(idx.size());
-
-    // Upload to GPU
-    GLuint vao = 0, ebo = 0;
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &ebo);
-    glBindVertexArray(vao);
-
-    VertexBuffer vbo(verts.data(), static_cast<GLsizei>(verts.size()));
-    IndexBuffer ibo(const_cast<GLuint*>(idx.data()), indexCount);
-
-    vbo.Bind();
-    ibo.Bind();
-
-    // aPos (location=0) -> 2 floats, stride 4 floats
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    // aUV (location=1) -> 2 floats, after pos
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // Tell the shader how many rows/cols (uniforms)
     glUseProgram(prog);
-    GLint uCols = glGetUniformLocation(prog, "uCols");
-    GLint uRows = glGetUniformLocation(prog, "uRows");
-    glUniform1i(uCols, GRID_COLS);
-    glUniform1i(uRows, GRID_ROWS);
+    glUniform1i(glGetUniformLocation(prog, "uCols"), GRID_COLS);
+    glUniform1i(glGetUniformLocation(prog, "uRows"), GRID_ROWS);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -105,17 +74,17 @@ int main(int argc, char **argv)
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-
         glUseProgram(prog);
-        glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+
+        vertexArray->Bind();
+
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(gridTopology.size()), GL_UNSIGNED_INT, 0);
 
         app.Swap(window);
         app.Poll();
     }
 
     // Cleanup
-    glDeleteVertexArrays(1,&vao);
     glDeleteProgram(prog);
     app.Destroy(window);
 

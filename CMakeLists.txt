@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # and optionally its version, description, and other attributes.
 project(PROG2002)
 
-include_directories(external/glad)
+# include_directories(external/glad)
 # add_library(glad external/glad/src/glad.c) # Removed to avoid duplicate addition of glad
 
 # Set the C++ standard to C++17 for all targets in the project. This variable denotes
