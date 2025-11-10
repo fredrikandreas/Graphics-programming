@@ -56,6 +56,12 @@ int main(int argc, char **argv)
                                        glm::vec3(0.0f, 0.0f, 0.0f),
                                        glm::vec3(0.0f, 1.0f, 0.0f));
 
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
+    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 2.0f));
+
+    glm::mat4 chessboardModelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
     // Main loop
