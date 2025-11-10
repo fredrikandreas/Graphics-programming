@@ -71,6 +71,7 @@ add_subdirectory(examples/example_5)
 # labs is either under development or optional.
 add_subdirectory(labs/lab1)
 add_subdirectory(labs/lab2)
+add_subdirectory(labs/lab3)
 
 # Add a subdirectory for a framework. This line is commented out, possibly because the
 # framework is either under development or optional.
