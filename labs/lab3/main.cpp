@@ -1,5 +1,4 @@
 #include <glad/glad.h>
-#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <GLFWApplication.h>
 #include <GeometricTools.h>
@@ -7,6 +6,8 @@
 #include <IndexBuffer.h>
 #include <VertexArray.h>
 #include <Shader.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp> 
 
 #include <iostream>
 #include <vector>
@@ -49,6 +50,8 @@ int main(int argc, char **argv)
     auto program = chessboardShader->GetProgramID();
     glUniform1i(glGetUniformLocation(program, "uCols"), GRID_COLS);
     glUniform1i(glGetUniformLocation(program, "uRows"), GRID_ROWS);
+
+    glm::mat4 projectionMatrix = glm::perspective(45.0f, 1.0f, 1.0f, -10.0f);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
