@@ -33,43 +33,37 @@ namespace GeometricTools
             float dy = 1.0f / DivY;
             int index = 0;
 
-            for (int i = 0; i <= DivX; i++)
-            {
-                float x = -0.5f + i * dx;
-                vertices[index++] = x;
-                vertices[index++] = -0.5f;
-                vertices[index++] = x;
-                vertices[index++] = 0.5f;
-            }
-            for (int j = 0; j <= DivY; j++)
+            for (int j = 0; j <= DivY; ++j)
             {
                 float y = -0.5f + j * dy;
-                vertices[index++] = -0.5f;
-                vertices[index++] = y;
-                vertices[index++] = 0.5f;
-                vertices[index++] = y;
+                for (int i = 0; i <= DivX; ++i)
+                {
+                    float x = -0.5f + i * dx;
+                    vertices[index++] = x;
+                    vertices[index++] = y;
+                }
             }
         }
 
     public:
-        static constexpr int TotalFloats = 4 * (DivX + DivY + 2);
-        static constexpr int TotalVertices = TotalFloats / 2;
+        static constexpr int NumVertices = (DivX + 1) * (DivY + 1);
+        static constexpr int NumFloats = NumVertices * 2;
 
-        std::array<float, TotalFloats> vertices{};
+        std::array<float, NumFloats> vertices{};
 
         UnitGridGeometry2D()
         {
             GenerateGrid();
         }
 
-        const std::array<float, TotalFloats> &GetGrid() const
+        const std::array<float, NumFloats> &GetGrid() const
         {
             return vertices;
         }
 
         int GetVertexCount() const
         {
-            return TotalVertices;
+            return NumVertices;
         }
     };
 
@@ -120,4 +114,59 @@ namespace GeometricTools
         }
     };
 
+    // Unit cube centered at origin.
+    class UnitCubeGeometry3D
+    {
+    public:
+        static constexpr int NumVertices = 8;
+        static constexpr int NumFloats = NumVertices * 3;
+
+        std::array<float, NumFloats> vertices{};
+
+        UnitCubeGeometry3D()
+        {
+            // 8 corner vertices (x,y,z)
+            vertices = {
+                -0.5f, -0.5f, -0.5f, // 0
+                0.5f, -0.5f, -0.5f,  // 1
+                0.5f, 0.5f, -0.5f,   // 2
+                -0.5f, 0.5f, -0.5f,  // 3
+                -0.5f, -0.5f, 0.5f,  // 4
+                0.5f, -0.5f, 0.5f,   // 5
+                0.5f, 0.5f, 0.5f,    // 6
+                -0.5f, 0.5f, 0.5f    // 7
+            };
+        }
+
+        const std::array<float, NumFloats> &GetVertices() const { return vertices; }
+    };
+
+    class UnitCubeTopologyTriangles
+    {
+    public:
+        static constexpr int NumIndices = 36;
+        std::array<GLuint, NumIndices> indices{};
+
+        UnitCubeTopologyTriangles()
+        {
+            indices = {
+                // Back face (-Z)
+                0, 1, 2, 0, 2, 3,
+                // Front face (+Z)
+                4, 6, 5, 4, 7, 6,
+                // Bottom face (-Y)
+                0, 4, 5, 0, 5, 1,
+                // Top face (+Y)
+                3, 2, 6, 3, 6, 7,
+                // Right face (+X)
+                1, 5, 6, 1, 6, 2,
+                // Left face (-X)
+                0, 3, 7, 0, 7, 4};
+        }
+
+        const std::array<GLuint, NumIndices> &GetIndices() const
+        {
+            return indices;
+        }
+    };
 }

@@ -15,6 +15,7 @@ GLFWwindow *GLFWApplication::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, versionMinor);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
     // 3. Create window
     GLFWwindow *window = glfwCreateWindow(width, height, appName.c_str(), nullptr, nullptr);

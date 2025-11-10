@@ -2,18 +2,27 @@
 #include <glm/glm.hpp>
 
 #include <memory>
-#include "VertexArray.h"
 
 namespace RenderCommands
 {
-    inline void Clear(GLuint mode = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    inline void Clear()
     {
-        glClear(mode);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    inline void EnableDepthTesting()
+    {
+        glEnable(GL_DEPTH_TEST);
     }
 
     inline void SetPolygonMode(GLenum face, GLenum mode)
     {
         glPolygonMode(face, mode);
+    }
+
+    inline void SetViewport(int x, int y, int w, int h)
+    {
+        glViewport(x, y, w, h);
     }
 
     inline void DrawIndex(const std::shared_ptr<VertexArray> &vao, GLenum primitive)
