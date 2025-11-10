@@ -4,6 +4,7 @@
 #include <GLFWApplication.h>
 #include <GeometricTools.h>
 #include <VertexBuffer.h>
+#include <IndexBuffer.h>
 
 #include <iostream>
 #include <vector>
@@ -78,11 +79,10 @@ int main(int argc, char **argv)
     glBindVertexArray(vao);
 
     VertexBuffer vbo(verts.data(), static_cast<GLsizei>(verts.size()));
+    IndexBuffer ibo(const_cast<GLuint*>(idx.data()), indexCount);
 
     vbo.Bind();
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(GLuint), idx.data(), GL_STATIC_DRAW);
+    ibo.Bind();
 
     // aPos (location=0) -> 2 floats, stride 4 floats
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
@@ -115,7 +115,6 @@ int main(int argc, char **argv)
     }
 
     // Cleanup
-    glDeleteBuffers(1,&ebo);
     glDeleteVertexArrays(1,&vao);
     glDeleteProgram(prog);
     app.Destroy(window);
