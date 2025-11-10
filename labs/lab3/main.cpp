@@ -52,6 +52,9 @@ int main(int argc, char **argv)
     glUniform1i(glGetUniformLocation(program, "uRows"), GRID_ROWS);
 
     glm::mat4 projectionMatrix = glm::perspective(45.0f, 1.0f, 1.0f, -10.0f);
+    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f),
+                                       glm::vec3(0.0f, 0.0f, 0.0f),
+                                       glm::vec3(0.0f, 1.0f, 0.0f));
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
