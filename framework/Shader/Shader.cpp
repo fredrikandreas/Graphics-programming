@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader(const std::string &vertexSrc, const std::string &fragmentSrc)
 {
@@ -37,6 +38,13 @@ void Shader::UploadUniformFloat2(const std::string& name, const glm::vec2& vecto
     GLint location = glGetUniformLocation(ShaderProgram, name.c_str());
     Bind();
     glUniform2f(location, vector.x, vector.y);
+}
+
+void Shader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix)
+{
+    GLint location = glGetUniformLocation(ShaderProgram, name.c_str());
+    Bind();
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 void Shader::CompileShader(GLenum shaderType, const std::string &shaderSrc)

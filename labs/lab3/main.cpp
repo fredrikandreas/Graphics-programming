@@ -7,7 +7,7 @@
 #include <VertexArray.h>
 #include <Shader.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp> 
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <vector>
@@ -24,10 +24,36 @@ const int V_MINOR = 1;
 const int GRID_ROWS = 8;
 const int GRID_COLS = 8;
 
+glm::ivec2 selectedTile = {0, 0};
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_UP:
+            selectedTile.y = glm::clamp(selectedTile.y - 1, 0, GRID_ROWS - 1);
+            break;
+        case GLFW_KEY_DOWN:
+            selectedTile.y = glm::clamp(selectedTile.y + 1, 0, GRID_ROWS - 1);
+            break;
+        case GLFW_KEY_LEFT:
+            selectedTile.x = glm::clamp(selectedTile.x - 1, 0, GRID_COLS - 1);
+            break;
+        case GLFW_KEY_RIGHT:
+            selectedTile.x = glm::clamp(selectedTile.x + 1, 0, GRID_COLS - 1);
+            break;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     GLFWApplication app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
     GLFWwindow *window = app.Init();
+
+    app.SetKeyCallback(window, key_callback);
 
     GeometricTools::UnitGridGeometry2D<GRID_COLS, GRID_ROWS> geometry;
     GeometricTools::UnitGridTopologyTriangles<GRID_COLS, GRID_ROWS> topology;
@@ -43,14 +69,6 @@ int main(int argc, char **argv)
     vertexArray->AddVertexBuffer(gridVertexBuffer);
     vertexArray->SetIndexBuffer(gridIndexBuffer);
 
-    auto chessboardShader = std::make_shared<Shader>(vertexShaderSrc, fragmentShaderSrc);
-    glm::vec2 selector = {0.0f, 0.0f};
-    chessboardShader->UploadUniformFloat2("selector", selector);
-
-    auto program = chessboardShader->GetProgramID();
-    glUniform1i(glGetUniformLocation(program, "uCols"), GRID_COLS);
-    glUniform1i(glGetUniformLocation(program, "uRows"), GRID_ROWS);
-
     glm::mat4 projectionMatrix = glm::perspective(45.0f, 1.0f, 1.0f, -10.0f);
     glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f),
                                        glm::vec3(0.0f, 0.0f, 0.0f),
@@ -58,9 +76,18 @@ int main(int argc, char **argv)
 
     glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
     glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, 2.0f));
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 2.0f));
 
     glm::mat4 chessboardModelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
+    auto chessboardShader = std::make_shared<Shader>(vertexShaderSrc, fragmentShaderSrc);
+    chessboardShader->UploadUniformMat4("u_projection", projectionMatrix);
+    chessboardShader->UploadUniformMat4("u_view", viewMatrix);
+    chessboardShader->UploadUniformMat4("u_model", chessboardModelMatrix);
+
+    auto program = chessboardShader->GetProgramID();
+    glUniform1i(glGetUniformLocation(program, "uCols"), GRID_COLS);
+    glUniform1i(glGetUniformLocation(program, "uRows"), GRID_ROWS);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -70,6 +97,7 @@ int main(int argc, char **argv)
         glClear(GL_COLOR_BUFFER_BIT);
 
         chessboardShader->Bind();
+        chessboardShader->UploadUniformFloat2("uSelectedTile", glm::vec2(selectedTile));
 
         vertexArray->Bind();
 

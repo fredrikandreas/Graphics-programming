@@ -30,6 +30,11 @@ public:
     // Swap buffers
     void Swap(GLFWwindow *window);
 
+    void SetKeyCallback(GLFWwindow *window, GLFWkeyfun callback)
+    {
+        glfwSetKeyCallback(window, callback);
+    };
+
     // Destroy window
     void Destroy(GLFWwindow *window);
 };
