@@ -1,7 +1,9 @@
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 #include <GLFWApplication.h>
 #include <GeometricTools.h>
+#include <VertexBuffer.h>
 
 #include <iostream>
 #include <vector>
@@ -34,9 +36,6 @@ int main(int argc, char **argv)
     GLFWwindow *window = app.Init();
 
     // Create shader program
-    GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc);
-    GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
-
     GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc);
     GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
     GLuint prog = glCreateProgram();
@@ -46,7 +45,7 @@ int main(int argc, char **argv)
     glDeleteShader(vs);
     glDeleteShader(fs);
 
-    // --- 1) Generate positions + UVs for a (DivX+1) x (DivY+1) grid
+    // Generate positions + UVs for a (DivX+1) x (DivY+1) grid
     // layout: [pos.x, pos.y, uv.x, uv.y]
     std::vector<float> verts;
     verts.reserve((GRID_COLS + 1) * (GRID_ROWS + 1) * 4);
@@ -72,16 +71,15 @@ int main(int argc, char **argv)
     const auto& idx = topology.GetIndices();
     const GLsizei indexCount = static_cast<GLsizei>(idx.size());
 
-    // ==== Upload to GPU ====
-    GLuint vao = 0, vbo = 0, ebo = 0;
+    // Upload to GPU
+    GLuint vao = 0, ebo = 0;
     glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
-
     glBindVertexArray(vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
+    VertexBuffer vbo(verts.data(), static_cast<GLsizei>(verts.size()));
+
+    vbo.Bind();
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(GLuint), idx.data(), GL_STATIC_DRAW);
@@ -118,7 +116,6 @@ int main(int argc, char **argv)
 
     // Cleanup
     glDeleteBuffers(1,&ebo);
-    glDeleteBuffers(1,&vbo);
     glDeleteVertexArrays(1,&vao);
     glDeleteProgram(prog);
     app.Destroy(window);
