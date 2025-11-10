@@ -6,8 +6,10 @@ Shader::Shader(const std::string &vertexSrc, const std::string &fragmentSrc)
     CompileShader(GL_FRAGMENT_SHADER, fragmentSrc);
 
     ShaderProgram = glCreateProgram();
+
     glAttachShader(ShaderProgram, VertexShader);
     glAttachShader(ShaderProgram, FragmentShader);
+
     glLinkProgram(ShaderProgram);
 
     glDeleteShader(VertexShader);
@@ -16,6 +18,7 @@ Shader::Shader(const std::string &vertexSrc, const std::string &fragmentSrc)
 
 Shader::~Shader()
 {
+    Unbind();
     glDeleteProgram(ShaderProgram);
 }
 
@@ -32,14 +35,18 @@ void Shader::Unbind() const
 void Shader::UploadUniformFloat2(const std::string& name, const glm::vec2& vector)
 {
     GLint location = glGetUniformLocation(ShaderProgram, name.c_str());
+    Bind();
     glUniform2f(location, vector.x, vector.y);
 }
 
 void Shader::CompileShader(GLenum shaderType, const std::string &shaderSrc)
 {
     GLuint shader = glCreateShader(shaderType);
+
     const char *src = shaderSrc.c_str();
+
     glShaderSource(shader, 1, &src, nullptr);
+
     glCompileShader(shader);
 
     if (shaderType == GL_VERTEX_SHADER)

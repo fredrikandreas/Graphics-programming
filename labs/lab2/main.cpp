@@ -1,11 +1,12 @@
 #include <glad/glad.h>
-
+#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <GLFWApplication.h>
 #include <GeometricTools.h>
 #include <VertexBuffer.h>
 #include <IndexBuffer.h>
 #include <VertexArray.h>
+#include <Shader.h>
 
 #include <iostream>
 #include <vector>
@@ -22,33 +23,10 @@ const int V_MINOR = 1;
 const int GRID_ROWS = 8;
 const int GRID_COLS = 8;
 
-struct GLFWwindow;
-
-// Compile shader helper
-GLuint CompileShader(GLenum type, const char *src)
-{
-    GLuint s = glCreateShader(type);
-    glShaderSource(s, 1, &src, nullptr);
-    glCompileShader(s);
-    return s;
-}
-
 int main(int argc, char **argv)
 {
     GLFWApplication app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
     GLFWwindow *window = app.Init();
-
-    // Create shader program
-    GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc);
-    GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
-    GLuint prog = glCreateProgram();
-
-    glAttachShader(prog, vs);
-    glAttachShader(prog, fs);
-    glLinkProgram(prog);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
 
     GeometricTools::UnitGridGeometry2D<GRID_COLS, GRID_ROWS> geometry;
     GeometricTools::UnitGridTopologyTriangles<GRID_COLS, GRID_ROWS> topology;
@@ -64,9 +42,13 @@ int main(int argc, char **argv)
     vertexArray->AddVertexBuffer(gridVertexBuffer);
     vertexArray->SetIndexBuffer(gridIndexBuffer);
 
-    glUseProgram(prog);
-    glUniform1i(glGetUniformLocation(prog, "uCols"), GRID_COLS);
-    glUniform1i(glGetUniformLocation(prog, "uRows"), GRID_ROWS);
+    auto chessboardShader = std::make_shared<Shader>(vertexShaderSrc, fragmentShaderSrc);
+    glm::vec2 selector = {0.0f, 0.0f};
+    chessboardShader->UploadUniformFloat2("selector", selector);
+
+    auto program = chessboardShader->GetProgramID();
+    glUniform1i(glGetUniformLocation(program, "uCols"), GRID_COLS);
+    glUniform1i(glGetUniformLocation(program, "uRows"), GRID_ROWS);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -74,7 +56,8 @@ int main(int argc, char **argv)
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(prog);
+
+        chessboardShader->Bind();
 
         vertexArray->Bind();
 
@@ -85,7 +68,6 @@ int main(int argc, char **argv)
     }
 
     // Cleanup
-    glDeleteProgram(prog);
     app.Destroy(window);
 
     return 0;

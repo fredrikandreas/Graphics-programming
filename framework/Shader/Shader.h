@@ -5,17 +5,18 @@
 class Shader
 {
 public:
-  Shader(const std::string &vertexSrc, const std::string &fragmentSrc);
-  ~Shader();
+    Shader(const std::string &vertexSrc, const std::string &fragmentSrc);
+    ~Shader();
 
-  void Bind() const;
-  void Unbind() const;
-  void UploadUniformFloat2(const std::string& name, const glm::vec2& vector);
+    void Bind() const;
+    void Unbind() const;
+    void UploadUniformFloat2(const std::string &name, const glm::vec2 &vector);
+    inline GLuint GetProgramID() const { return ShaderProgram; }
 
 private:
-  GLuint VertexShader;
-  GLuint FragmentShader;
-  GLuint ShaderProgram;
+    GLuint VertexShader;
+    GLuint FragmentShader;
+    GLuint ShaderProgram;
 
-  void CompileShader(GLenum shaderType, const std::string &shaderSrc);
+    void CompileShader(GLenum shaderType, const std::string &shaderSrc);
 };
