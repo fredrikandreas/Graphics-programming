@@ -1,0 +1,183 @@
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <GLFWApplication.h>
+#include <GeometricTools.h>
+#include <VertexBuffer.h>
+#include <IndexBuffer.h>
+#include <VertexArray.h>
+#include <Shader.h>
+#include <RenderCommands.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <type_traits>
+
+#include "shaders.h"
+
+const char *APP_NAME = "Lab 4";
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 800;
+const int V_MAJOR = 4;
+const int V_MINOR = 1;
+
+const int GRID_ROWS = 8;
+const int GRID_COLS = 8;
+
+glm::ivec2 selectedTile = {0, 0};
+float angle_x = 0.0f;
+float angle_y = 0.0f;
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_UP:
+            // selectedTile.y = glm::clamp(selectedTile.y - 1, 0, GRID_ROWS - 1);
+            angle_y -= 10.0f;
+            if (angle_y < 0.0f)
+            {
+                angle_y = 360.0f;
+            }
+            break;
+        case GLFW_KEY_DOWN:
+            // selectedTile.y = glm::clamp(selectedTile.y + 1, 0, GRID_ROWS - 1);
+            angle_y += 10.0f;
+            if (angle_y > 360.0f)
+            {
+                angle_y = 0.0f;
+            }
+            break;
+        case GLFW_KEY_LEFT:
+            // selectedTile.x = glm::clamp(selectedTile.x - 1, 0, GRID_COLS - 1);
+            angle_x -= 10.0f;
+            if (angle_x < 0.0f)
+            {
+                angle_x = 360.0f;
+            }
+            break;
+        case GLFW_KEY_RIGHT:
+            // selectedTile.x = glm::clamp(selectedTile.x + 1, 0, GRID_COLS - 1);
+            angle_x += 10.0f;
+            if (angle_x > 360.0f)
+            {
+                angle_x = 0.0f;
+            }
+            break;
+        }
+    }
+}
+
+int main(int argc, char **argv)
+{
+    GLFWApplication app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
+    GLFWwindow *window = app.Init();
+    RenderCommands::EnableDepthTesting();
+    RenderCommands::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+    int fbw, fbh;
+    glfwGetFramebufferSize(window, &fbw, &fbh);
+    RenderCommands::SetViewport(0, 0, fbw, fbh);
+    app.SetKeyCallback(window, key_callback);
+
+    // Grid / Chessboard
+    GeometricTools::UnitGridGeometry2D<GRID_COLS, GRID_ROWS> grid_g;
+    GeometricTools::UnitGridTopologyTriangles<GRID_COLS, GRID_ROWS> grid_t;
+    const auto &gridGeometry = grid_g.GetGrid();
+    const auto &gridTopology = grid_t.GetIndices();
+
+    auto gridIndexBuffer = std::make_shared<IndexBuffer>(gridTopology.data(), gridTopology.size());
+    auto gridBufferLayout = BufferLayout({{ShaderDataType::Float2, "aPos"}});
+    auto gridVertexBuffer = std::make_shared<VertexBuffer>(gridGeometry.data(), gridGeometry.size() * sizeof(gridGeometry[0]));
+    gridVertexBuffer->SetLayout(gridBufferLayout);
+    auto gridVertexArray = std::make_shared<VertexArray>();
+    gridVertexArray->AddVertexBuffer(gridVertexBuffer);
+    gridVertexArray->SetIndexBuffer(gridIndexBuffer);
+
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 1.0f, 1.0f, 10.0f);
+    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f),
+                                       glm::vec3(0.0f, 0.0f, 0.0f),
+                                       glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 gridScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
+    glm::mat4 gridRotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f));
+
+    glm::mat4 chessboardModelMatrix = gridTranslationMatrix * gridRotationMatrix * gridScaleMatrix;
+
+    auto chessboardShader = std::make_shared<Shader>(vertexShaderSrc, fragmentShaderSrc);
+    chessboardShader->Bind();
+    gridVertexBuffer->Bind();
+    gridIndexBuffer->Bind();
+    chessboardShader->UploadUniformMat4("u_projection", projectionMatrix);
+    chessboardShader->UploadUniformMat4("u_view", viewMatrix);
+    chessboardShader->UploadUniformMat4("u_model", chessboardModelMatrix);
+    chessboardShader->UploadUniformFloat2("uGrid", glm::vec2(GRID_COLS, GRID_ROWS));
+
+    gridVertexArray->Unbind();
+    gridVertexBuffer->Unbind();
+    gridIndexBuffer->Unbind();
+
+    // Cube
+    GeometricTools::UnitCubeGeometry3D cube_g;
+    GeometricTools::UnitCubeTopologyTriangles cube_t;
+    const auto &cubeGeometry = cube_g.GetVertices();
+    const auto &cubeTopology = cube_t.GetIndices();
+
+    auto cubeIndexBuffer = std::make_shared<IndexBuffer>(cubeTopology.data(), cubeTopology.size());
+    auto cubeBufferLayout = BufferLayout({{ShaderDataType::Float3, "aPos"}});
+    auto cubeVertexBuffer = std::make_shared<VertexBuffer>(cubeGeometry.data(), cubeGeometry.size() * sizeof(cubeGeometry[0]));
+    cubeVertexBuffer->SetLayout(cubeBufferLayout);
+    auto cubeVertexArray = std::make_shared<VertexArray>();
+    cubeVertexArray->AddVertexBuffer(cubeVertexBuffer);
+    cubeVertexArray->SetIndexBuffer(cubeIndexBuffer);
+
+    auto cubeShader = std::make_shared<Shader>(cubeVertexShaderSrc, cubeFragmentShaderSrc);
+    cubeShader->UploadUniformMat4("u_projection", projectionMatrix);
+    cubeShader->UploadUniformMat4("u_view", viewMatrix);
+
+    cubeVertexArray->Unbind();
+    cubeVertexBuffer->Unbind();
+    cubeIndexBuffer->Unbind();
+
+    // Main loop
+    while (!glfwWindowShouldClose(window))
+    {
+        RenderCommands::Clear();
+
+        // Draw grid/ chessboard
+        chessboardShader->Bind();
+        chessboardShader->UploadUniformFloat2("uSelectedTile", glm::vec2(selectedTile));
+
+        gridVertexArray->Bind();
+        RenderCommands::DrawIndex(gridVertexArray, GL_TRIANGLES);
+
+        // Draw cube
+        cubeShader->Bind();
+        cubeVertexArray->Bind();
+        glm::mat4 cubeRotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angle_x), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 cubeRotationY = glm::rotate(glm::mat4(1.0f), glm::radians(angle_y), glm::vec3(1.0f, 0.0f, 0.0f));
+        cubeShader->UploadUniformMat4("u_model", cubeRotationX * cubeRotationY);
+
+        RenderCommands::SetSolidMode();
+        cubeShader->UploadUniformFloat3("u_color", glm::vec3(0.25f, 0.5f, 0.5f));
+        RenderCommands::DrawIndex(cubeVertexArray, GL_TRIANGLES);
+
+        RenderCommands::SetWireframeMode();
+        cubeShader->UploadUniformFloat3("u_color", glm::vec3(0.0f, 0.0f, 0.0f));
+        RenderCommands::DrawIndex(cubeVertexArray, GL_TRIANGLES);
+
+        RenderCommands::SetSolidMode();
+
+        app.Swap(window);
+        app.Poll();
+    }
+
+    // Cleanup
+    app.Destroy(window);
+
+    return 0;
+}
