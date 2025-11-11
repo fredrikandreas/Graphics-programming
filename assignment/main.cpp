@@ -26,6 +26,8 @@ static const int WINDOW_HEIGHT = 600;
 static const int GL_MAJOR = 4;
 static const int GL_MINOR = 1;
 
+glm::ivec2 selectedTile = {0, 0};
+
 int main(int, char **)
 {
     GLFWApplication app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, GL_MAJOR, GL_MINOR);
@@ -63,12 +65,13 @@ int main(int, char **)
         float dt = static_cast<float>(now - last);
         last = now;
 
-        InputController::update(dt);
+        InputController::update(dt, selectedTile);
 
         RenderCommands::Clear();
         RenderCommands::SetSolidMode();
 
         board.setAmbient(1.0f);
+        board.setSelectedTile(selectedTile);
         board.draw();
         //pieces.draw(InputController::angleX(), InputController::angleY());
 
