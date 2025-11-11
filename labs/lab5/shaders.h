@@ -29,6 +29,9 @@ uniform vec2 u_gridSize;
 uniform sampler2D u_floorTextureSampler;
 uniform vec2 u_SelectedTile;
 
+uniform float u_ambientStrength = 1.0;
+uniform float u_translucence = 1.0;
+
 void main()
 {
     // Calculate the current tile's grid position
@@ -54,6 +57,7 @@ void main()
             : vec4(0.0, 0.0, 0.0, 1.0); // Black
     }
     FragColor = mix(baseColor, texture(u_floorTextureSampler, localUV), 0.9);
+    FragColor = vec4(u_ambientStrength * FragColor.rgb, u_translucence);
 }
 )";
 
@@ -77,10 +81,14 @@ const char *cubeFragmentShaderSrc = R"(
     #version 410 core
     uniform samplerCube u_cubeTextureSampler;
 
+    uniform float u_ambientStrength = 1.0;
+    uniform float u_translucence = 1.0;
+
     in vec3 vs_position;
     out vec4 color;
 
     void main() {
         color = texture(u_cubeTextureSampler, vs_position);
+        color = vec4(u_ambientStrength * color.rgb, u_translucence);
     }
 )";
