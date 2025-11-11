@@ -22,12 +22,12 @@ public:
     void SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer);
 
     // Get the index buffer
-    const std::shared_ptr<IndexBuffer> &GetIndexBuffer() const { return IdxBuffer; }
+    const std::shared_ptr<IndexBuffer> &GetIndexBuffer() const { return m_IdxBuffer; }
 
 private:
     GLuint m_vertexArrayID;
     std::vector<std::shared_ptr<VertexBuffer>> VertexBuffers;
-    std::shared_ptr<IndexBuffer> IdxBuffer;
+    std::shared_ptr<IndexBuffer> m_IdxBuffer;
 
     // Get the vertex buffers
     const std::vector<std::shared_ptr<VertexBuffer>> &GetVertexBuffers() const { return VertexBuffers; }
