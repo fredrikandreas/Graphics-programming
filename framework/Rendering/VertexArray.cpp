@@ -1,5 +1,4 @@
 #include "VertexArray.h"
-#include "ShadersDataTypes.h"
 
 VertexArray::VertexArray()
 {

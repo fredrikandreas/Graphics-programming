@@ -2,6 +2,7 @@
 #define __VERTEXARRAY_H_
 
 #include <glad/glad.h>
+#include <memory>
 #include <IndexBuffer.h>
 #include <VertexBuffer.h>
 
