@@ -1,3 +1,6 @@
+#ifndef __VERTEXARRAY_H_
+#define __VERTEXARRAY_H_
+
 #include <glad/glad.h>
 #include <IndexBuffer.h>
 #include <VertexBuffer.h>
@@ -22,13 +25,15 @@ public:
     void SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer);
 
     // Get the index buffer
-    const std::shared_ptr<IndexBuffer> &GetIndexBuffer() const { return m_IdxBuffer; }
+    const std::shared_ptr<IndexBuffer> &GetIndexBuffer() const { return IdxBuffer; }
 
 private:
     GLuint m_vertexArrayID;
     std::vector<std::shared_ptr<VertexBuffer>> VertexBuffers;
-    std::shared_ptr<IndexBuffer> m_IdxBuffer;
+    std::shared_ptr<IndexBuffer> IdxBuffer;
 
     // Get the vertex buffers
     const std::vector<std::shared_ptr<VertexBuffer>> &GetVertexBuffers() const { return VertexBuffers; }
 };
+
+#endif // __VERTEXARRAY_H_

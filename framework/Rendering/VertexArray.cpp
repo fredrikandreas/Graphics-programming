@@ -66,9 +66,7 @@ void VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vertexBuf
 }
 
 void VertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexBuffer)
-{
-    Bind();
+{   
     indexBuffer->Bind();
-    
-    this->m_IdxBuffer = indexBuffer;
+    IdxBuffer = indexBuffer;
 }
