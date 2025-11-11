@@ -28,8 +28,8 @@ const int WINDOW_HEIGHT = 800;
 const int V_MAJOR = 4;
 const int V_MINOR = 1;
 
-const int GRID_ROWS = 8;
-const int GRID_COLS = 8;
+const int GRID_ROWS = 7;
+const int GRID_COLS = 7;
 
 glm::ivec2 selectedTile = {0, 0};
 float angle_x = 0.0f;
@@ -134,9 +134,11 @@ int main(int argc, char **argv)
     RenderCommands::SetViewport(0, 0, fbw, fbh);
     app.SetKeyCallback(window, key_callback);
 
+    auto cameraPosition = glm::vec3(0.0f, 1.0f, 5.0f);
+
     // Setting up camera
     PerspectiveCamera perspectiveCamera = PerspectiveCamera({45.0f, 1.0f, 1.0f, 1.0f, 10.0f},
-                                                            {0.0f, 1.0f, 5.0f},
+                                                            cameraPosition,
                                                             {0.0f, 0.0f, 0.0f},
                                                             {0.0f, 1.0f, 0.0f});
 
@@ -173,9 +175,9 @@ int main(int argc, char **argv)
     gridVertexArray->AddVertexBuffer(gridVertexBuffer);
     gridVertexArray->SetIndexBuffer(gridIndexBuffer);
 
-    glm::mat4 gridScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
+    glm::mat4 gridScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(8.0f, 8.0f, 1.0f));
     glm::mat4 gridRotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -0.5f, -1.25f));
+    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-4.0f, -0.5f, -5.0f));
 
     glm::mat4 chessboardModelMatrix = gridTranslationMatrix * gridRotationMatrix * gridScaleMatrix;
 
@@ -193,13 +195,17 @@ int main(int argc, char **argv)
     chessboardShader->Unbind();
 
     // Cube
-    GeometricTools::UnitCubeGeometry3D cube_g;
-    GeometricTools::UnitCubeTopologyTriangles cube_t;
+    GeometricTools::UnitCubeGeometry3D24WNormals cube_g;
+    GeometricTools::UnitCubeTopologyTriangles24 cube_t;
     const auto &cubeGeometry = cube_g.GetVertices();
     const auto &cubeTopology = cube_t.GetIndices();
+    
 
     auto cubeIndexBuffer = std::make_shared<IndexBuffer>(cubeTopology.data(), cubeTopology.size());
-    auto cubeBufferLayout = BufferLayout({{ShaderDataType::Float3, "i_position"}});
+    auto cubeBufferLayout = BufferLayout({
+        {ShaderDataType::Float3, "position"},
+        {ShaderDataType::Float3, "normal"}
+    });
     auto cubeVertexBuffer = std::make_shared<VertexBuffer>(cubeGeometry.data(), cubeGeometry.size() * sizeof(cubeGeometry[0]));
     cubeVertexBuffer->SetLayout(cubeBufferLayout);
     auto cubeVertexArray = std::make_shared<VertexArray>();
@@ -207,9 +213,13 @@ int main(int argc, char **argv)
     cubeVertexArray->SetIndexBuffer(cubeIndexBuffer);
 
     auto cubeShader = std::make_shared<Shader>(cubeVertexShaderSrc, cubeFragmentShaderSrc);
+    cubeShader->Bind();
     cubeShader->UploadUniformMat4("u_projection", perspectiveCamera.GetProjectionMatrix());
     cubeShader->UploadUniformMat4("u_view", perspectiveCamera.GetViewMatrix());
     cubeShader->UploadUniformInt("u_cubeTextureSampler", 1);
+
+    cubeShader->UploadUniformFloat3("u_lightSourcePosition", cameraPosition);
+    cubeShader->UploadUniformFloat("u_diffuseStrength", 0.8);
 
     cubeVertexArray->Unbind();
     cubeShader->Unbind();
@@ -229,6 +239,11 @@ int main(int argc, char **argv)
     // Set the blending function: s*alpha + d(1-alpha)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glFrontFace(GL_CCW);
+
     RenderCommands::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 
     // Main loop
@@ -240,7 +255,7 @@ int main(int argc, char **argv)
 
         angle_x += angVelX * dt;
         angle_y += angVelY * dt;
-        
+
         angle_x = wrap360(angle_x);
         angle_y = wrap360(angle_y);
 

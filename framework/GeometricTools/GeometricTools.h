@@ -214,4 +214,84 @@ namespace GeometricTools
             }
         }
     };
+
+    // Unit cube with per-face normals (24 unique vertices)
+    class UnitCubeGeometry3D24WNormals
+    {
+    public:
+        static constexpr int NumVertices = 24;
+        static constexpr int NumFloats = NumVertices * 6; // position (3) + normal (3)
+
+        std::array<float, NumFloats> vertices{};
+
+        UnitCubeGeometry3D24WNormals()
+        {
+            vertices = {
+                // Front (+Z)
+                -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+                0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+                0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+                -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+
+                // Back (-Z)
+                -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+                -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+                0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+                0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+
+                // Left (-X)
+                -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+                -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+                -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+                -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+
+                // Right (+X)
+                0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+                0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+                0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+                0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+
+                // Top (+Y)
+                -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+                -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+                0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+                0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+
+                // Bottom (-Y)
+                -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+                0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+                0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+                -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f};
+        }
+
+        const std::array<float, NumFloats> &GetVertices() const { return vertices; }
+    };
+
+    // Unit cube topology for 24-vertex cube
+    class UnitCubeTopologyTriangles24
+    {
+    public:
+        static constexpr int NumIndices = 36;
+        std::array<GLuint, NumIndices> indices{};
+
+        UnitCubeTopologyTriangles24()
+        {
+            indices = {
+                // Front
+                0, 1, 2, 0, 2, 3,
+                // Back
+                4, 5, 6, 4, 6, 7,
+                // Left
+                8, 9, 10, 8, 10, 11,
+                // Right
+                12, 13, 14, 12, 14, 15,
+                // Top
+                16, 17, 18, 16, 18, 19,
+                // Bottom
+                20, 21, 22, 20, 22, 23};
+        }
+
+        const std::array<GLuint, NumIndices> &GetIndices() const { return indices; }
+    };
+
 }

@@ -63,17 +63,20 @@ void main()
 
 const char *cubeVertexShaderSrc = R"(
     #version 410 core
-    layout(location = 0) in vec3 i_position;
+    layout(location=0) in vec3 position;
+    layout(location=3) in vec3 normal;
 
-    uniform mat4 u_projection;
-    uniform mat4 u_view;
-    uniform mat4 u_model;
+    uniform mat4 u_projection, u_view, u_model;
 
     out vec3 vs_position;
+    out vec4 vs_normal;
+    out vec4 vs_fragPosition;
 
     void main() {
-        gl_Position = u_projection * u_view * u_model * vec4(i_position, 1.0);
-        vs_position = i_position;
+        vs_position = position;
+        gl_Position = u_projection * u_view * u_model * vec4(position, 1.0);
+        vs_normal = normalize(u_model * vec4(normal, 1.0));
+        vs_fragPosition = u_model * vec4(position, 1.0);
     }
 )";
 
@@ -84,11 +87,21 @@ const char *cubeFragmentShaderSrc = R"(
     uniform float u_ambientStrength = 1.0;
     uniform float u_translucence = 1.0;
 
+    uniform vec3 u_lightSourcePosition;
+    uniform float u_diffuseStrength;
+
+
     in vec3 vs_position;
+    in vec4 vs_normal;
+    in vec4 vs_fragPosition;
     out vec4 color;
 
     void main() {
+        vec3 lightDirection = normalize(vec3(u_lightSourcePosition - vs_fragPosition.xyz));
+        float diffuseStrength = max(dot(lightDirection, vs_normal.xyz), 0.0f) * u_diffuseStrength;
+
         color = texture(u_cubeTextureSampler, vs_position);
-        color = vec4(u_ambientStrength * color.rgb, u_translucence);
+        color = vec4(color.rgb * (u_ambientStrength + diffuseStrength), u_translucence);
+
     }
 )";
