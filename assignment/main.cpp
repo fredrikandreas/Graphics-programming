@@ -57,6 +57,8 @@ int main(int, char **)
     PieceRenderer pieces;
     pieces.init(cam, board, cameras.eye());
 
+    InputController::setPieceRenderer(&pieces);
+
     // Loop
     double last = glfwGetTime();
     while (!glfwWindowShouldClose(window))

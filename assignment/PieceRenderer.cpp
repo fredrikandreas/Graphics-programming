@@ -16,6 +16,8 @@
 
 void PieceRenderer::init(const PerspectiveCamera &cam, const BoardRenderer &board, const glm::vec3 &cameraPosition)
 {
+    m_board = &board;
+
     // texture (using cube sampler id 1 to stay consistent)
     TextureManager::GetInstance()->LoadCubeMapRGBA("cube",
                                                    std::string(TEXTURES_DIR) + "cube_texture.png", 1);
@@ -99,12 +101,69 @@ void PieceRenderer::draw(float timeSeconds, const glm::ivec2 &selectedTile)
 
         if (p.col == selectedTile.x && p.row == selectedTile.y)
         {
-            color = glm::vec3(0.5f, 0.5f, 0.0f); // green-ish highlight
+            color = glm::vec3(0.5f, 0.5f, 0.0f);
             M = glm::translate(M, glm::vec3(0.0f, levitate, 0.0f));
         }
 
         m_shader->UploadUniformMat4("u_model", M);
         m_shader->UploadUniformFloat3("u_color", color);
         RenderCommands::DrawIndex(m_vao, GL_TRIANGLES);
+    }
+}
+
+bool PieceRenderer::tileOccupied(const glm::ivec2 &tile) const
+{
+    for (const auto &p : m_pieces)
+        if (p.col == tile.x && p.row == tile.y)
+            return true;
+    return false;
+}
+
+void PieceRenderer::selectOrMove(const glm::ivec2 &selectedTile)
+{
+    // No piece selected yet, try selecting one
+    if (!m_selectedPiece.has_value())
+    {
+        for (int i = 0; i < m_pieces.size(); ++i)
+        {
+            auto &p = m_pieces[i];
+            if (p.col == selectedTile.x && p.row == selectedTile.y)
+            {
+                p.moving = true;
+                p.originalColor = p.color;
+                p.color = glm::vec3(0.5f, 0.5f, 0.0f);
+                m_selectedPiece = i;
+                return;
+            }
+        }
+    }
+    else // A piece is already selected, try to move it
+    {
+        int i = *m_selectedPiece;
+        auto &movingPiece = m_pieces[i];
+
+        // Target occupied? cancel move
+        if (tileOccupied(selectedTile))
+        {
+            movingPiece.color = movingPiece.originalColor;
+            movingPiece.moving = false;
+            m_selectedPiece.reset();
+            return;
+        }
+
+        // Move piece: update col/row and transform
+        movingPiece.col = selectedTile.x;
+        movingPiece.row = selectedTile.y;
+
+        glm::vec3 worldCenter = m_board->tileCenterWorld(selectedTile.x, selectedTile.y);
+        glm::vec3 lift(0.0f, 0.08f, 0.0f);
+        movingPiece.model = glm::translate(glm::mat4(1.0f), worldCenter + lift);
+        movingPiece.model = glm::scale(movingPiece.model, glm::vec3(0.3f));
+
+        // Revert back to original color after successful move
+        movingPiece.color = movingPiece.originalColor;
+
+        movingPiece.moving = false;
+        m_selectedPiece.reset();
     }
 }

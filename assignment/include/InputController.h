@@ -1,5 +1,6 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include "PieceRenderer.h"
 
 class InputController
 {
@@ -10,6 +11,7 @@ public:
     static float angleX(); // degrees
     static float angleY(); // degrees
 
+    static void setPieceRenderer(PieceRenderer* renderer); 
     static void selectTile(const glm::ivec2 &tile);
     static glm::ivec2 getSelectedTile();
 
@@ -19,4 +21,5 @@ private:
     static float s_angVelX, s_angVelY;
     static constexpr float s_rotationSpeed = 90.0f; // deg/s per key
     static glm::ivec2 s_selectedTile;
+    static PieceRenderer* s_renderer;  
 };

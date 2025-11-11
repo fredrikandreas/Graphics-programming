@@ -8,6 +8,8 @@ float InputController::s_angVelY = 0.0f;
 
 glm::ivec2 InputController::s_selectedTile = glm::ivec2(0, 0);
 
+PieceRenderer* InputController::s_renderer = nullptr;
+
 static float wrap360(float a)
 {
     a = std::fmod(a, 360.0f);
@@ -96,6 +98,8 @@ void InputController::keyCallback(GLFWwindow *window, int key, int, int action, 
         case GLFW_KEY_RIGHT:
             s_selectedTile.x = glm::clamp(s_selectedTile.x + 1, 0, 7);
             break;
+        case GLFW_KEY_ENTER:
+            s_renderer->selectOrMove(s_selectedTile);
         }
     }
 }
@@ -109,4 +113,9 @@ void InputController::selectTile(const glm::ivec2 &tile)
 glm::ivec2 InputController::getSelectedTile()
 {
     return s_selectedTile;
+}
+
+void InputController::setPieceRenderer(PieceRenderer* renderer)
+{
+    s_renderer = renderer;
 }
