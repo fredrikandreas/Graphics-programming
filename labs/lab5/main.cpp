@@ -129,7 +129,6 @@ int main(int argc, char **argv)
     GLFWwindow *window = app.Init();
     glfwSwapInterval(1);
     RenderCommands::EnableDepthTesting();
-    RenderCommands::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
     int fbw, fbh;
     glfwGetFramebufferSize(window, &fbw, &fbh);
     RenderCommands::SetViewport(0, 0, fbw, fbh);
@@ -216,29 +215,40 @@ int main(int argc, char **argv)
     cubeShader->Unbind();
 
     double lastTime = glfwGetTime();
+    double now;
+    float dt;
+    auto wrap360 = [](float a)
+    {
+        a = std::fmod(a, 360.0f);
+        return (a < 0.0f) ? a + 360.0f : a;
+    };
+    float cycle;
 
     // Enable blending
     glEnable(GL_BLEND);
     // Set the blending function: s*alpha + d(1-alpha)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    RenderCommands::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
-        double now = glfwGetTime();
-        float dt = static_cast<float>(now - lastTime);
+        now = glfwGetTime();
+        dt = static_cast<float>(now - lastTime);
         lastTime = now;
 
         angle_x += angVelX * dt;
         angle_y += angVelY * dt;
-
-        auto wrap360 = [](float a)
-        {
-            a = std::fmod(a, 360.0f);
-            return (a < 0.0f) ? a + 360.0f : a;
-        };
+        
         angle_x = wrap360(angle_x);
         angle_y = wrap360(angle_y);
+
+        cycle = 0.2f + ((sin(now) / 3) + 0.5f) * 0.8f;
+
+        chessboardShader->UploadUniformFloat("u_ambientStrength", cycle);
+        cubeShader->UploadUniformFloat("u_ambientStrength", cycle);
+        RenderCommands::SetClearColor(glm::vec4(0.4f * cycle, 0.4f * cycle, 0.6f * cycle, 1.0f));
 
         RenderCommands::Clear();
         RenderCommands::SetSolidMode();

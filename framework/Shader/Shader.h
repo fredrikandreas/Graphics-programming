@@ -13,6 +13,7 @@ public:
 
     void UploadUniformInt(const std::string &name, const int number);
 
+    void UploadUniformFloat(const std::string &name, const float number);
     void UploadUniformFloat2(const std::string &name, const glm::vec2 &vector);
     void UploadUniformFloat3(const std::string &name, const glm::vec3 &vector);
 
