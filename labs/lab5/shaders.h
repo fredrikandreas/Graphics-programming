@@ -90,6 +90,7 @@ const char *cubeFragmentShaderSrc = R"(
     uniform vec3 u_lightSourcePosition;
     uniform float u_diffuseStrength;
 
+    uniform vec3 u_lightColor = vec3(1.0, 1.0, 0.85);
 
     in vec3 vs_position;
     in vec4 vs_normal;
@@ -101,7 +102,12 @@ const char *cubeFragmentShaderSrc = R"(
         float diffuseStrength = max(dot(lightDirection, vs_normal.xyz), 0.0f) * u_diffuseStrength;
 
         color = texture(u_cubeTextureSampler, vs_position);
-        color = vec4(color.rgb * (u_ambientStrength + diffuseStrength), u_translucence);
+
+        vec3 lighting = (u_ambientStrength + diffuseStrength) * u_lightColor;
+
+        vec3 litColor = color.rgb * lighting;
+
+        color = vec4(litColor, u_translucence);
 
     }
 )";
