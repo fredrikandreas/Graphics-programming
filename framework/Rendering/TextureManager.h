@@ -40,6 +40,7 @@ public:
 public:
     bool LoadTexture2DRGBA(const std::string &name, const std::string &filepath, GLuint unit, bool mipMap = true);
     bool LoadCubeMapRGBA(const std::string &name, const std::string &filePath, GLuint unit, bool mipMap = true);
+    bool LoadCubeMapCustomRGBA(const std::string &name, const std::array<std::string,6> &filepaths, GLuint unit, bool mipMap = true);
     GLuint GetUnitByName(const std::string &name) const;
 
 private:
