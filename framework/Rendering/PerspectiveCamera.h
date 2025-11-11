@@ -3,8 +3,6 @@
 
 #include "Camera.h"
 
-#include <array>
-
 class PerspectiveCamera : public Camera
 {
 public:

@@ -3,10 +3,6 @@
 
 #include "Camera.h"
 
-#include <glm/fwd.hpp>
-
-#include <array>
-
 class OrthographicCamera : public Camera
 {
 public:

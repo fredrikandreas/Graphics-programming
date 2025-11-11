@@ -1,8 +1,10 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
-#include "glm/fwd.hpp"
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <array>
 
 class Camera
 {

@@ -10,6 +10,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <TextureManager.h>
+#include <Camera.h>
+#include <PerspectiveCamera.h>
+#include <OrthographicCamera.h>
 
 #include <cmath>
 #include <iostream>
@@ -132,6 +135,16 @@ int main(int argc, char **argv)
     RenderCommands::SetViewport(0, 0, fbw, fbh);
     app.SetKeyCallback(window, key_callback);
 
+    // Setting up camera
+    PerspectiveCamera perspectiveCamera = PerspectiveCamera({45.0f, 1.0f, 1.0f, 1.0f, 10.0f},
+                                                            {0.0f, 1.0f, 5.0f},
+                                                            {0.0f, 0.0f, 0.0f},
+                                                            {0.0f, 1.0f, 0.0f});
+
+    OrthographicCamera orthographicCamera = OrthographicCamera({-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f},
+                                                               {0.0f, 1.0f, 5.0f},
+                                                               0.0f);
+
     // Loading textures
     TextureManager *textureManager = TextureManager::GetInstance();
     textureManager->LoadTexture2DRGBA("floor", TEXTURES_DIR + std::string("cube_top.png"), 0);
@@ -161,11 +174,6 @@ int main(int argc, char **argv)
     gridVertexArray->AddVertexBuffer(gridVertexBuffer);
     gridVertexArray->SetIndexBuffer(gridIndexBuffer);
 
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 1.0f, 1.0f, 10.0f);
-    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f),
-                                       glm::vec3(0.0f, 0.0f, 0.0f),
-                                       glm::vec3(0.0f, 1.0f, 0.0f));
-
     glm::mat4 gridScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
     glm::mat4 gridRotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -0.5f, -1.25f));
@@ -176,8 +184,8 @@ int main(int argc, char **argv)
     chessboardShader->Bind();
     gridVertexBuffer->Bind();
     gridIndexBuffer->Bind();
-    chessboardShader->UploadUniformMat4("u_projection", projectionMatrix);
-    chessboardShader->UploadUniformMat4("u_view", viewMatrix);
+    chessboardShader->UploadUniformMat4("u_projection", perspectiveCamera.GetProjectionMatrix());
+    chessboardShader->UploadUniformMat4("u_view", perspectiveCamera.GetViewMatrix());
     chessboardShader->UploadUniformMat4("u_model", chessboardModelMatrix);
     chessboardShader->UploadUniformFloat2("u_gridSize", glm::vec2(GRID_COLS, GRID_ROWS));
     chessboardShader->UploadUniformInt("u_floorTextureSampler", 0);
@@ -200,8 +208,8 @@ int main(int argc, char **argv)
     cubeVertexArray->SetIndexBuffer(cubeIndexBuffer);
 
     auto cubeShader = std::make_shared<Shader>(cubeVertexShaderSrc, cubeFragmentShaderSrc);
-    cubeShader->UploadUniformMat4("u_projection", projectionMatrix);
-    cubeShader->UploadUniformMat4("u_view", viewMatrix);
+    cubeShader->UploadUniformMat4("u_projection", perspectiveCamera.GetProjectionMatrix());
+    cubeShader->UploadUniformMat4("u_view", perspectiveCamera.GetViewMatrix());
     cubeShader->UploadUniformInt("u_cubeTextureSampler", 1);
 
     cubeVertexArray->Unbind();
