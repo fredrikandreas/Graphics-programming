@@ -1,6 +1,6 @@
 project(lab4)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp Lab4Application.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -11,6 +11,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE GLFWApplication)
 target_link_libraries(${PROJECT_NAME} PRIVATE GeometricTools)
 target_link_libraries(${PROJECT_NAME} PRIVATE Rendering)
 target_link_libraries(${PROJECT_NAME} PRIVATE Shader)
+target_link_libraries(${PROJECT_NAME} PRIVATE stb)
 
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
@@ -26,3 +27,6 @@ add_custom_command(
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
   TEXTURES_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/")
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE STB_IMAGE_IMPLEMENTATION)
+target_compile_definitions(${PROJECT_NAME} PRIVATE STB_IMAGE_STATIC)

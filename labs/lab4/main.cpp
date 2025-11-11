@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <GLFWApplication.h>
+#include <Lab4Application.h>
 #include <GeometricTools.h>
 #include <VertexBuffer.h>
 #include <IndexBuffer.h>
@@ -121,7 +121,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 int main(int argc, char **argv)
 {
-    GLFWApplication app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
+    Lab4Application app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
     GLFWwindow *window = app.Init();
     glfwSwapInterval(1);
     RenderCommands::EnableDepthTesting();
@@ -130,6 +130,10 @@ int main(int argc, char **argv)
     glfwGetFramebufferSize(window, &fbw, &fbh);
     RenderCommands::SetViewport(0, 0, fbw, fbh);
     app.SetKeyCallback(window, key_callback);
+
+    // Loading textures
+    app.LoadTexture(TEXTURES_DIR + std::string("floor_texture.png"), 0);
+    app.LoadTexture(TEXTURES_DIR + std::string("cube_texture.png"), 0);
 
     // Grid / Chessboard
     GeometricTools::UnitGridGeometry2D<GRID_COLS, GRID_ROWS> grid_g;
