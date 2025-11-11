@@ -9,6 +9,7 @@
 // STD includes
 #include <string>
 #include <vector>
+#include <array>
 
 class TextureManager
 {
