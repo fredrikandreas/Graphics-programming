@@ -133,16 +133,20 @@ int main(int argc, char **argv)
 
     // Loading textures
     app.LoadTexture(TEXTURES_DIR + std::string("floor_texture.png"), 0);
-    app.LoadTexture(TEXTURES_DIR + std::string("cube_texture.png"), 0);
+    // app.LoadTexture(TEXTURES_DIR + std::string("cube_texture.png"), 0);
 
     // Grid / Chessboard
-    GeometricTools::UnitGridGeometry2D<GRID_COLS, GRID_ROWS> grid_g;
+    GeometricTools::UnitGridGeometry2DWTCoords<GRID_COLS, GRID_ROWS> grid_g;
     GeometricTools::UnitGridTopologyTriangles<GRID_COLS, GRID_ROWS> grid_t;
     const auto &gridGeometry = grid_g.GetGrid();
     const auto &gridTopology = grid_t.GetIndices();
 
     auto gridIndexBuffer = std::make_shared<IndexBuffer>(gridTopology.data(), gridTopology.size());
-    auto gridBufferLayout = BufferLayout({{ShaderDataType::Float2, "aPos"}});
+    auto gridBufferLayout = BufferLayout({
+        {ShaderDataType::Float2, "a_inPosition"},
+        {ShaderDataType::Float2, "a_inTexCoord"}
+    });
+
     auto gridVertexBuffer = std::make_shared<VertexBuffer>(gridGeometry.data(), gridGeometry.size() * sizeof(gridGeometry[0]));
     gridVertexBuffer->SetLayout(gridBufferLayout);
     auto gridVertexArray = std::make_shared<VertexArray>();
@@ -156,7 +160,7 @@ int main(int argc, char **argv)
 
     glm::mat4 gridScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
     glm::mat4 gridRotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f));
+    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -0.5f, 0.0f));
 
     glm::mat4 chessboardModelMatrix = gridTranslationMatrix * gridRotationMatrix * gridScaleMatrix;
 
@@ -167,13 +171,15 @@ int main(int argc, char **argv)
     chessboardShader->UploadUniformMat4("u_projection", projectionMatrix);
     chessboardShader->UploadUniformMat4("u_view", viewMatrix);
     chessboardShader->UploadUniformMat4("u_model", chessboardModelMatrix);
-    chessboardShader->UploadUniformFloat2("uGrid", glm::vec2(GRID_COLS, GRID_ROWS));
+    chessboardShader->UploadUniformFloat2("u_gridSize", glm::vec2(GRID_COLS, GRID_ROWS));
+    chessboardShader->UploadUniformInt("u_floorTextureSampler", 0);
 
     gridVertexArray->Unbind();
     gridVertexBuffer->Unbind();
     gridIndexBuffer->Unbind();
 
     // Cube
+    /*
     GeometricTools::UnitCubeGeometry3D cube_g;
     GeometricTools::UnitCubeTopologyTriangles cube_t;
     const auto &cubeGeometry = cube_g.GetVertices();
@@ -194,6 +200,7 @@ int main(int argc, char **argv)
     cubeVertexArray->Unbind();
     cubeVertexBuffer->Unbind();
     cubeIndexBuffer->Unbind();
+    */
 
     double lastTime = glfwGetTime();
     // Main loop
@@ -215,15 +222,17 @@ int main(int argc, char **argv)
         angle_y = wrap360(angle_y);
 
         RenderCommands::Clear();
+        RenderCommands::SetSolidMode();
 
         // Draw grid/ chessboard
         chessboardShader->Bind();
-        chessboardShader->UploadUniformFloat2("uSelectedTile", glm::vec2(selectedTile));
+        chessboardShader->UploadUniformFloat2("u_SelectedTile", glm::vec2(selectedTile));
 
         gridVertexArray->Bind();
         RenderCommands::DrawIndex(gridVertexArray, GL_TRIANGLES);
 
         // Draw cube
+        /*
         cubeShader->Bind();
         cubeVertexArray->Bind();
         glm::mat4 cubeRotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angle_x), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -237,8 +246,9 @@ int main(int argc, char **argv)
         RenderCommands::SetWireframeMode();
         cubeShader->UploadUniformFloat3("u_color", glm::vec3(0.0f, 0.0f, 0.0f));
         RenderCommands::DrawIndex(cubeVertexArray, GL_TRIANGLES);
-
+        
         RenderCommands::SetSolidMode();
+        */
 
         app.Swap(window);
         app.Poll();

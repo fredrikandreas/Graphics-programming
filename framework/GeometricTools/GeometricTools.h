@@ -169,4 +169,49 @@ namespace GeometricTools
             return indices;
         }
     };
+    // Constexpr version that generates the geometry of the grid, including texture coordinates
+    // The shape of the generated data is PPTTPPTTPPTT..., meaning two components for position
+    // and two components for texture coordinates.
+    template <unsigned int X, unsigned int Y>
+    class UnitGridGeometry2DWTCoords
+    {
+    public:
+        static constexpr GLsizei total = (X + 1) * (Y + 1) * (2 + 2);
+        std::array<float, total> verticies;
+        UnitGridGeometry2DWTCoords()
+        {
+            generate();
+        }
+        const std::array<float, total> &GetGrid() const
+        {
+            return verticies;
+        }
+
+    private:
+        void generate()
+        {
+            float stepX = 1.0f / X;
+            float stepY = 1.0f / Y;
+
+            float startX = -0.5f;
+            float startY = -0.5f;
+
+            float startTX = 0.0f;
+            float startTY = 0.0f;
+
+            std::size_t index = 0;
+
+            for (size_t y = 0; y <= Y; ++y)
+            {
+                for (size_t x = 0; x <= X; ++x)
+                {
+                    index = (y * (X + 1) + x) * 4;
+                    verticies[index] = startX + (x * stepX);
+                    verticies[index + 1] = startY + (y * stepY);
+                    verticies[index + 2] = startTX + (x * stepX);
+                    verticies[index + 3] = startTY + (y * stepY);
+                }
+            }
+        }
+    };
 }

@@ -10,6 +10,9 @@ public:
 
     void Bind() const;
     void Unbind() const;
+
+    void UploadUniformInt(const std::string &name, const int number);
+
     void UploadUniformFloat2(const std::string &name, const glm::vec2 &vector);
     void UploadUniformFloat3(const std::string &name, const glm::vec3 &vector);
 

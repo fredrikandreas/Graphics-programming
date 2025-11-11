@@ -22,7 +22,7 @@ add_custom_command(
 add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/dirt_top.png
+  ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/floor_texture.png
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/floor_texture.png)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

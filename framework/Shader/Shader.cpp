@@ -33,6 +33,13 @@ void Shader::Unbind() const
     glUseProgram(0);
 }
 
+void Shader::UploadUniformInt(const std::string& name, const int number)
+{
+    GLint location = glGetUniformLocation(ShaderProgram, name.c_str());
+    Bind();
+    glUniform1i(location, number);
+}
+
 void Shader::UploadUniformFloat2(const std::string& name, const glm::vec2& vector)
 {
     GLint location = glGetUniformLocation(ShaderProgram, name.c_str());
