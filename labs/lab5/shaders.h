@@ -92,6 +92,11 @@ const char *cubeFragmentShaderSrc = R"(
 
     uniform vec3 u_lightColor = vec3(1.0, 1.0, 0.85);
 
+    uniform vec3 u_cameraPosition;
+    uniform vec3 u_specularColor = vec3(1.0, 0.85, 0.85);
+    uniform float u_specularStrength = 0.4f;
+
+
     in vec3 vs_position;
     in vec4 vs_normal;
     in vec4 vs_fragPosition;
@@ -99,13 +104,20 @@ const char *cubeFragmentShaderSrc = R"(
 
     void main() {
         vec3 lightDirection = normalize(vec3(u_lightSourcePosition - vs_fragPosition.xyz));
+
         float diffuseStrength = max(dot(lightDirection, vs_normal.xyz), 0.0f) * u_diffuseStrength;
 
-        color = texture(u_cubeTextureSampler, vs_position);
+        vec3 reflectedLight = normalize(reflect(-lightDirection, normalize(vs_normal.xyz)));
+        vec3 observerDirection = normalize(u_cameraPosition - vs_fragPosition.xyz);
+        float specFactor = pow(max(dot(observerDirection, reflectedLight), 0.0), 12.0);
+        vec3 specular = specFactor * u_specularColor * u_specularStrength;
+
+
+        vec4 texColor = texture(u_cubeTextureSampler, vs_position);
 
         vec3 lighting = (u_ambientStrength + diffuseStrength) * u_lightColor;
 
-        vec3 litColor = color.rgb * lighting;
+        vec3 litColor = texColor.rgb * lighting + specular;
 
         color = vec4(litColor, u_translucence);
 

@@ -219,7 +219,12 @@ int main(int argc, char **argv)
     cubeShader->UploadUniformInt("u_cubeTextureSampler", 1);
 
     cubeShader->UploadUniformFloat3("u_lightSourcePosition", cameraPosition);
-    cubeShader->UploadUniformFloat("u_diffuseStrength", 0.8);
+    cubeShader->UploadUniformFloat("u_diffuseStrength", 0.8f);
+
+    // Application code
+    cubeShader->UploadUniformFloat3("u_cameraPosition", cameraPosition);
+    cubeShader->UploadUniformFloat("u_specularStrength", 0.1f);
+
 
     cubeVertexArray->Unbind();
     cubeShader->Unbind();
