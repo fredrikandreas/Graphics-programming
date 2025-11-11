@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-// #include <Lab4Application.h>
 #include <GLFWApplication.h>
 #include <GeometricTools.h>
 #include <VertexBuffer.h>
@@ -134,9 +133,17 @@ int main(int argc, char **argv)
     app.SetKeyCallback(window, key_callback);
 
     // Loading textures
-    // app.LoadTexture(TEXTURES_DIR + std::string("cube_top.png"), 0);
     TextureManager *textureManager = TextureManager::GetInstance();
     textureManager->LoadTexture2DRGBA("floor", TEXTURES_DIR + std::string("cube_top.png"), 0);
+    textureManager->LoadCubeMapCustomRGBA("cubeMapCustom",
+                                          std::array<std::string, 6>{
+                                              TEXTURES_DIR + std::string("cube_sides.png"),  // Right
+                                              TEXTURES_DIR + std::string("cube_sides.png"),  // Left
+                                              TEXTURES_DIR + std::string("cube_top.png"),    // Top
+                                              TEXTURES_DIR + std::string("cube_bottom.png"), // Bottom
+                                              TEXTURES_DIR + std::string("cube_sides.png"),  // Back
+                                              TEXTURES_DIR + std::string("cube_sides.png")}, // Front
+                                          1);
 
     // Grid / Chessboard
     GeometricTools::UnitGridGeometry2DWTCoords<GRID_COLS, GRID_ROWS> grid_g;
@@ -179,22 +186,6 @@ int main(int argc, char **argv)
     chessboardShader->Unbind();
 
     // Cube
-    /*app.LoadCubeMap(std::array<std::string, 3>{
-                        TEXTURES_DIR + std::string("cube_top.png"),
-                        TEXTURES_DIR + std::string("cube_bottom.png"),
-                        TEXTURES_DIR + std::string("cube_sides.png")},
-                    1);*/
-    // textureManager->LoadCubeMapRGBA("cubeMap", TEXTURES_DIR + std::string("cube_bottom.png"), 1);
-    textureManager->LoadCubeMapCustomRGBA("cubeMapCustom",
-                                          std::array<std::string, 6>{
-                                              TEXTURES_DIR + std::string("cube_sides.png"),
-                                              TEXTURES_DIR + std::string("cube_sides.png"),
-                                              TEXTURES_DIR + std::string("cube_top.png"),
-                                              TEXTURES_DIR + std::string("cube_bottom.png"),
-                                              TEXTURES_DIR + std::string("cube_sides.png"),
-                                              TEXTURES_DIR + std::string("cube_sides.png")},
-                                          1);
-
     GeometricTools::UnitCubeGeometry3D cube_g;
     GeometricTools::UnitCubeTopologyTriangles cube_t;
     const auto &cubeGeometry = cube_g.GetVertices();
@@ -253,11 +244,9 @@ int main(int argc, char **argv)
         // Draw cube
         cubeShader->Bind();
         cubeVertexArray->Bind();
-
         glm::mat4 cubeRotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angle_x), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 cubeRotationY = glm::rotate(glm::mat4(1.0f), glm::radians(angle_y), glm::vec3(1.0f, 0.0f, 0.0f));
         cubeShader->UploadUniformMat4("u_model", cubeRotationX * cubeRotationY);
-
         RenderCommands::DrawIndex(cubeVertexArray, GL_TRIANGLES);
 
         app.Swap(window);
