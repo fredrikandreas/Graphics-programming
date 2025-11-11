@@ -11,6 +11,7 @@ public:
         : GLFWApplication(name, w, h, major, minor), appName(name), width(w), height(h), versionMajor(major), versionMinor(minor) {}
 
     GLuint LoadTexture(const std::string &filepath, GLuint slot);
+    GLuint LoadCubeMap(const std::array<std::string,3> &filepaths, GLuint slot);
 
 private:
     std::string appName;

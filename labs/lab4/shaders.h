@@ -59,24 +59,28 @@ void main()
 
 const char *cubeVertexShaderSrc = R"(
     #version 410 core
-    layout(location = 0) in vec3 aPos;
+    layout(location = 0) in vec3 i_position;
 
     uniform mat4 u_projection;
     uniform mat4 u_view;
     uniform mat4 u_model;
 
+    out vec3 vs_position;
+
     void main() {
-        gl_Position = u_projection * u_view * u_model * vec4(aPos, 1.0);
+        gl_Position = u_projection * u_view * u_model * vec4(i_position, 1.0);
+        vs_position = i_position;
     }
 )";
 
 const char *cubeFragmentShaderSrc = R"(
     #version 410 core
-    uniform vec3 u_color;
+    uniform samplerCube u_cubeTextureSampler;
 
+    in vec3 vs_position;
     out vec4 color;
 
     void main() {
-        color = vec4(u_color, 1.0);
+        color = texture(u_cubeTextureSampler, vs_position);
     }
 )";

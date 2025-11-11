@@ -132,8 +132,7 @@ int main(int argc, char **argv)
     app.SetKeyCallback(window, key_callback);
 
     // Loading textures
-    app.LoadTexture(TEXTURES_DIR + std::string("floor_texture.png"), 0);
-    // app.LoadTexture(TEXTURES_DIR + std::string("cube_texture.png"), 0);
+    app.LoadTexture(TEXTURES_DIR + std::string("cube_top.png"), 0);
 
     // Grid / Chessboard
     GeometricTools::UnitGridGeometry2DWTCoords<GRID_COLS, GRID_ROWS> grid_g;
@@ -142,10 +141,8 @@ int main(int argc, char **argv)
     const auto &gridTopology = grid_t.GetIndices();
 
     auto gridIndexBuffer = std::make_shared<IndexBuffer>(gridTopology.data(), gridTopology.size());
-    auto gridBufferLayout = BufferLayout({
-        {ShaderDataType::Float2, "a_inPosition"},
-        {ShaderDataType::Float2, "a_inTexCoord"}
-    });
+    auto gridBufferLayout = BufferLayout({{ShaderDataType::Float2, "a_inPosition"},
+                                          {ShaderDataType::Float2, "a_inTexCoord"}});
 
     auto gridVertexBuffer = std::make_shared<VertexBuffer>(gridGeometry.data(), gridGeometry.size() * sizeof(gridGeometry[0]));
     gridVertexBuffer->SetLayout(gridBufferLayout);
@@ -160,7 +157,7 @@ int main(int argc, char **argv)
 
     glm::mat4 gridScaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(4.0f, 4.0f, 1.0f));
     glm::mat4 gridRotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -0.5f, 0.0f));
+    glm::mat4 gridTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -0.5f, -1.25f));
 
     glm::mat4 chessboardModelMatrix = gridTranslationMatrix * gridRotationMatrix * gridScaleMatrix;
 
@@ -175,18 +172,22 @@ int main(int argc, char **argv)
     chessboardShader->UploadUniformInt("u_floorTextureSampler", 0);
 
     gridVertexArray->Unbind();
-    gridVertexBuffer->Unbind();
-    gridIndexBuffer->Unbind();
+    chessboardShader->Unbind();
 
     // Cube
-    /*
+    app.LoadCubeMap(std::array<std::string, 3>{
+                        TEXTURES_DIR + std::string("cube_top.png"),
+                        TEXTURES_DIR + std::string("cube_bottom.png"),
+                        TEXTURES_DIR + std::string("cube_sides.png")},
+                    1);
+
     GeometricTools::UnitCubeGeometry3D cube_g;
     GeometricTools::UnitCubeTopologyTriangles cube_t;
     const auto &cubeGeometry = cube_g.GetVertices();
     const auto &cubeTopology = cube_t.GetIndices();
 
     auto cubeIndexBuffer = std::make_shared<IndexBuffer>(cubeTopology.data(), cubeTopology.size());
-    auto cubeBufferLayout = BufferLayout({{ShaderDataType::Float3, "aPos"}});
+    auto cubeBufferLayout = BufferLayout({{ShaderDataType::Float3, "i_position"}});
     auto cubeVertexBuffer = std::make_shared<VertexBuffer>(cubeGeometry.data(), cubeGeometry.size() * sizeof(cubeGeometry[0]));
     cubeVertexBuffer->SetLayout(cubeBufferLayout);
     auto cubeVertexArray = std::make_shared<VertexArray>();
@@ -196,13 +197,18 @@ int main(int argc, char **argv)
     auto cubeShader = std::make_shared<Shader>(cubeVertexShaderSrc, cubeFragmentShaderSrc);
     cubeShader->UploadUniformMat4("u_projection", projectionMatrix);
     cubeShader->UploadUniformMat4("u_view", viewMatrix);
+    cubeShader->UploadUniformInt("u_cubeTextureSampler", 1);
 
     cubeVertexArray->Unbind();
-    cubeVertexBuffer->Unbind();
-    cubeIndexBuffer->Unbind();
-    */
+    cubeShader->Unbind();
 
     double lastTime = glfwGetTime();
+
+    // Enable blending
+    glEnable(GL_BLEND);
+    // Set the blending function: s*alpha + d(1-alpha)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -226,29 +232,19 @@ int main(int argc, char **argv)
 
         // Draw grid/ chessboard
         chessboardShader->Bind();
-        chessboardShader->UploadUniformFloat2("u_SelectedTile", glm::vec2(selectedTile));
-
         gridVertexArray->Bind();
+        chessboardShader->UploadUniformFloat2("u_SelectedTile", glm::vec2(selectedTile));
         RenderCommands::DrawIndex(gridVertexArray, GL_TRIANGLES);
 
         // Draw cube
-        /*
         cubeShader->Bind();
         cubeVertexArray->Bind();
+
         glm::mat4 cubeRotationX = glm::rotate(glm::mat4(1.0f), glm::radians(angle_x), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 cubeRotationY = glm::rotate(glm::mat4(1.0f), glm::radians(angle_y), glm::vec3(1.0f, 0.0f, 0.0f));
         cubeShader->UploadUniformMat4("u_model", cubeRotationX * cubeRotationY);
 
-        RenderCommands::SetSolidMode();
-        cubeShader->UploadUniformFloat3("u_color", glm::vec3(0.25f, 0.5f, 0.5f));
         RenderCommands::DrawIndex(cubeVertexArray, GL_TRIANGLES);
-
-        RenderCommands::SetWireframeMode();
-        cubeShader->UploadUniformFloat3("u_color", glm::vec3(0.0f, 0.0f, 0.0f));
-        RenderCommands::DrawIndex(cubeVertexArray, GL_TRIANGLES);
-        
-        RenderCommands::SetSolidMode();
-        */
 
         app.Swap(window);
         app.Poll();
