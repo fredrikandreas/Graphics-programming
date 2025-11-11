@@ -73,6 +73,7 @@ add_subdirectory(labs/lab1)
 add_subdirectory(labs/lab2)
 add_subdirectory(labs/lab3)
 add_subdirectory(labs/lab4)
+add_subdirectory(labs/lab5)
 
 # Add a subdirectory for a framework. This line is commented out, possibly because the
 # framework is either under development or optional.
