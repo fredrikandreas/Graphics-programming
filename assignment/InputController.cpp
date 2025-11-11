@@ -8,7 +8,10 @@ float InputController::s_angVelY = 0.0f;
 
 glm::ivec2 InputController::s_selectedTile = glm::ivec2(0, 0);
 
-PieceRenderer* InputController::s_renderer = nullptr;
+PieceRenderer *InputController::s_renderer = nullptr;
+
+float InputController::s_azimuthDeg = 45.0f;
+float InputController::s_radius = 7.0f;
 
 static float wrap360(float a)
 {
@@ -100,6 +103,19 @@ void InputController::keyCallback(GLFWwindow *window, int key, int, int action, 
             break;
         case GLFW_KEY_ENTER:
             s_renderer->selectOrMove(s_selectedTile);
+        case GLFW_KEY_H:
+            s_azimuthDeg = wrap360(s_azimuthDeg - s_orbitStep);
+            break;
+        case GLFW_KEY_L:
+            s_azimuthDeg = wrap360(s_azimuthDeg + s_orbitStep);
+            break;
+
+        case GLFW_KEY_O:
+            s_radius = std::min(s_radius + s_radiusStep, s_radiusMax);
+            break;
+        case GLFW_KEY_P:
+            s_radius = std::max(s_radius - s_radiusStep, s_radiusMin);
+            break;
         }
     }
 }
@@ -115,7 +131,10 @@ glm::ivec2 InputController::getSelectedTile()
     return s_selectedTile;
 }
 
-void InputController::setPieceRenderer(PieceRenderer* renderer)
+void InputController::setPieceRenderer(PieceRenderer *renderer)
 {
     s_renderer = renderer;
 }
+
+float InputController::azimuthDeg() { return s_azimuthDeg; }
+float InputController::radius() { return s_radius; }

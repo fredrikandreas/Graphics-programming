@@ -23,6 +23,8 @@ public:
     void selectOrMove(const glm::ivec2& selectedTile);
     bool tileOccupied(const glm::ivec2& tile) const;
 
+    void setCamera(const PerspectiveCamera& cam);
+
 private:
     struct Piece
     {

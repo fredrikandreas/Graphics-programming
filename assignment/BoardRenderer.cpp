@@ -92,3 +92,17 @@ glm::vec3 BoardRenderer::tileCenterWorld(int col, int row) const
     const glm::vec4 world = m_model * glm::vec4(ux, uy, 0.0f, 1.0f);
     return glm::vec3(world);
 }
+
+glm::vec3 BoardRenderer::boardCenterWorld() const
+{
+    // center of unit grid (0.5,0.5,0) in local, then model to world
+    return glm::vec3(m_model * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+}
+
+void BoardRenderer::setCamera(const PerspectiveCamera &cam)
+{
+    m_shader->Bind();
+    m_shader->UploadUniformMat4("u_projection", cam.GetProjectionMatrix());
+    m_shader->UploadUniformMat4("u_view", cam.GetViewMatrix());
+    m_shader->Unbind();
+}

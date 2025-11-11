@@ -25,6 +25,8 @@ public:
     int cols() const { return m_cols; }
     int rows() const { return m_rows; }
     glm::vec3 tileCenterWorld(int col, int row) const;
+    glm::vec3 boardCenterWorld() const;              
+    void setCamera(const PerspectiveCamera& cam);
 
 private:
     int m_cols, m_rows;

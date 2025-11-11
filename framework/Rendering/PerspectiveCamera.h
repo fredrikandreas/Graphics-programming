@@ -46,6 +46,12 @@ public:
         this->RecalculateMatrix();
     }
 
+    void SetPosition(const glm::vec3 &pos)
+    {
+        this->Position = pos;
+        this->RecalculateMatrix();
+    }
+
 protected:
     void RecalculateMatrix();
 

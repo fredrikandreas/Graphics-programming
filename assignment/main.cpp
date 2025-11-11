@@ -69,6 +69,27 @@ int main(int, char **)
 
         InputController::update(dt, selectedTile);
 
+        glm::vec3 boardCenter(0.0f, 0.0f, 0.0f);
+
+        // Orbit parameters from input
+
+        // orbit camera values
+        float azimuth = glm::radians(InputController::azimuthDeg());
+        float radius = InputController::radius();
+        float elevation = glm::radians(35.0f); // fixed elevation angle
+
+        // spherical orbit
+        float rc = radius * std::cos(elevation);
+        glm::vec3 eye(
+            boardCenter.x + rc * std::cos(azimuth),
+            boardCenter.y + radius * std::sin(elevation),
+            boardCenter.z + rc * std::sin(azimuth));
+
+        // Apply orbit to your PerspectiveCamera
+        cam.SetPosition(eye);
+        cam.SetLookAt(boardCenter);
+        cam.SetUpVector(glm::vec3(0.0f, 1.0f, 0.0f));
+
         RenderCommands::Clear();
         RenderCommands::SetSolidMode();
 

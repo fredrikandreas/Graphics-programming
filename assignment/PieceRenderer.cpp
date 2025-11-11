@@ -167,3 +167,11 @@ void PieceRenderer::selectOrMove(const glm::ivec2 &selectedTile)
         m_selectedPiece.reset();
     }
 }
+
+void PieceRenderer::setCamera(const PerspectiveCamera &cam)
+{
+    m_shader->Bind();
+    m_shader->UploadUniformMat4("u_projection", cam.GetProjectionMatrix());
+    m_shader->UploadUniformMat4("u_view", cam.GetViewMatrix());
+    m_shader->Unbind();
+}
