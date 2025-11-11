@@ -76,3 +76,19 @@ void BoardRenderer::setAmbient(float a)
     m_shader->Bind();
     m_shader->UploadUniformFloat("u_ambientStrength", a);
 }
+
+glm::vec3 BoardRenderer::tileCenterWorld(int col, int row) const
+{
+    col = glm::clamp(col, 0, m_cols - 1);
+    row = glm::clamp(row, 0, m_rows - 1);
+
+    // Map tile center into [0..1] unit-square space
+    const float ux = (col + 0.5f) / float(m_cols);
+    const float uy = (row + 0.5f) / float(m_rows);
+
+    // If your visual top row is row=7 but appears at the "bottom", flip Y:
+    // const float uy = 1.0f - (row + 0.5f) / float(m_rows);
+
+    const glm::vec4 world = m_model * glm::vec4(ux, uy, 0.0f, 1.0f);
+    return glm::vec3(world);
+}

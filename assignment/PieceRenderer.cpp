@@ -14,7 +14,7 @@
 #define TEXTURES_DIR ""
 #endif
 
-void PieceRenderer::init(const PerspectiveCamera &cam, const glm::vec3 &cameraPosition)
+void PieceRenderer::init(const PerspectiveCamera &cam, const BoardRenderer &board, const glm::vec3 &cameraPosition)
 {
     // texture (using cube sampler id 1 to stay consistent)
     TextureManager::GetInstance()->LoadCubeMapRGBA("cube",
@@ -43,17 +43,68 @@ void PieceRenderer::init(const PerspectiveCamera &cam, const glm::vec3 &cameraPo
     m_shader->UploadUniformFloat("u_diffuseStrength", 0.8f);
     m_shader->UploadUniformFloat3("u_cameraPosition", cameraPosition);
     m_shader->UploadUniformFloat("u_specularStrength", 0.1f);
+
+    // build chess starting positions (red bottom, blue top)
+    auto placePiece = [&](int col, int row, const glm::vec3 &color)
+    {
+        // ask the board for the real world center of this tile
+        glm::vec3 worldCenter = board.tileCenterWorld(col, row);
+
+        // keep a tiny levitation above the board plane (Y is up after the board’s 90° X-rot)
+        constexpr glm::vec3 lift(0.0f, 0.08f, 0.0f);
+
+        glm::mat4 M(1.0f);
+        M = glm::translate(M, worldCenter + lift);
+        M = glm::scale(M, glm::vec3(0.3f));
+        m_pieces.push_back({M, color, col, row});
+    };
+
+    // use the board’s real grid size
+    const int C = board.cols();
+    const int R = board.rows();
+
+    // pawns
+    for (int c = 0; c < C; ++c)
+    {
+        placePiece(c, 1, glm::vec3(0.8f, 0.1f, 0.1f));     // red
+        placePiece(c, R - 2, glm::vec3(0.1f, 0.1f, 0.8f)); // blue
+    }
+
+    // back ranks
+    for (int c = 0; c < C; ++c)
+    {
+        placePiece(c, 0, glm::vec3(0.8f, 0.1f, 0.1f));     // red back
+        placePiece(c, R - 1, glm::vec3(0.1f, 0.1f, 0.8f)); // blue back
+    }
+
+    m_vao->Unbind();
+    m_vbo->Unbind();
+    m_ibo->Unbind();
     m_shader->Unbind();
 }
 
-void PieceRenderer::draw(float angleXDeg, float angleYDeg)
+void PieceRenderer::draw(float timeSeconds, const glm::ivec2 &selectedTile)
 {
     m_shader->Bind();
     m_vao->Bind();
 
-    glm::mat4 Rx = glm::rotate(glm::mat4(1.0f), glm::radians(angleXDeg), glm::vec3(0, 1, 0));
-    glm::mat4 Ry = glm::rotate(glm::mat4(1.0f), glm::radians(angleYDeg), glm::vec3(1, 0, 0));
-    m_shader->UploadUniformMat4("u_model", Rx * Ry);
+    float baseHeight = 1.0f; // middle point
+    float amplitude = 0.5f;  // total swing up/down around base
+    float levitate = baseHeight + amplitude * std::sin(timeSeconds * 2.0f);
 
-    RenderCommands::DrawIndex(m_vao, GL_TRIANGLES);
+    for (const auto &p : m_pieces)
+    {
+        glm::mat4 M = p.model;
+        glm::vec3 color = p.color;
+
+        if (p.col == selectedTile.x && p.row == selectedTile.y)
+        {
+            color = glm::vec3(0.5f, 0.5f, 0.0f); // green-ish highlight
+            M = glm::translate(M, glm::vec3(0.0f, levitate, 0.0f));
+        }
+
+        m_shader->UploadUniformMat4("u_model", M);
+        m_shader->UploadUniformFloat3("u_color", color);
+        RenderCommands::DrawIndex(m_vao, GL_TRIANGLES);
+    }
 }

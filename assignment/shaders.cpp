@@ -97,6 +97,8 @@ const char *vertexShaderSrc = R"(
         uniform vec3 u_cameraPosition;
         uniform vec3 u_specularColor = vec3(1.0, 0.85, 0.85);
         uniform float u_specularStrength = 0.4f;
+
+        uniform vec3 u_color;
     
     
         in vec3 vs_position;
@@ -118,8 +120,10 @@ const char *vertexShaderSrc = R"(
             vec4 texColor = texture(u_cubeTextureSampler, vs_position);
     
             vec3 lighting = (u_ambientStrength + diffuseStrength) * u_lightColor;
+
+            //vec3 tAndC = mix(u_color, texColor.rgb, 0.0);
     
-            vec3 litColor = texColor.rgb * lighting + specular;
+            vec3 litColor = u_color * lighting + specular;
     
             color = vec4(litColor, u_translucence);
     

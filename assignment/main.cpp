@@ -55,7 +55,7 @@ int main(int, char **)
     board.init(cam);
 
     PieceRenderer pieces;
-    pieces.init(cam, cameras.eye());
+    pieces.init(cam, board, cameras.eye());
 
     // Loop
     double last = glfwGetTime();
@@ -73,7 +73,8 @@ int main(int, char **)
         board.setAmbient(1.0f);
         board.setSelectedTile(selectedTile);
         board.draw();
-        //pieces.draw(InputController::angleX(), InputController::angleY());
+
+        pieces.draw(static_cast<float>(now), selectedTile);
 
         app.Swap(window);
         app.Poll();
