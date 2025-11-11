@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -29,16 +30,20 @@ const int GRID_COLS = 8;
 glm::ivec2 selectedTile = {0, 0};
 float angle_x = 0.0f;
 float angle_y = 0.0f;
+float rotationSpeed = 90.0f;
+float angVelX = 0.0f;
+float angVelY = 0.0f;
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    /*
     if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
         switch (key)
         {
         case GLFW_KEY_UP:
             // selectedTile.y = glm::clamp(selectedTile.y - 1, 0, GRID_ROWS - 1);
-            angle_y -= 10.0f;
+            angle_y -= 20.0f;
             if (angle_y < 0.0f)
             {
                 angle_y = 360.0f;
@@ -46,7 +51,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_DOWN:
             // selectedTile.y = glm::clamp(selectedTile.y + 1, 0, GRID_ROWS - 1);
-            angle_y += 10.0f;
+            angle_y += 20.0f;
             if (angle_y > 360.0f)
             {
                 angle_y = 0.0f;
@@ -54,7 +59,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_LEFT:
             // selectedTile.x = glm::clamp(selectedTile.x - 1, 0, GRID_COLS - 1);
-            angle_x -= 10.0f;
+            angle_x -= 20.0f;
             if (angle_x < 0.0f)
             {
                 angle_x = 360.0f;
@@ -62,11 +67,53 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             break;
         case GLFW_KEY_RIGHT:
             // selectedTile.x = glm::clamp(selectedTile.x + 1, 0, GRID_COLS - 1);
-            angle_x += 10.0f;
+            angle_x += 20.0f;
             if (angle_x > 360.0f)
             {
                 angle_x = 0.0f;
             }
+            break;
+        }
+    }
+    */
+    if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_UP:
+            angVelY -= rotationSpeed;
+            break; // rotate around X-ax in your model
+        case GLFW_KEY_DOWN:
+            angVelY += rotationSpeed;
+            break;
+        case GLFW_KEY_LEFT:
+            angVelX -= rotationSpeed;
+            break; // rotate around Y-ax in your model
+        case GLFW_KEY_RIGHT:
+            angVelX += rotationSpeed;
+            break;
+        default:
+            break;
+        }
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        // Revert the velocity change for the released key
+        switch (key)
+        {
+        case GLFW_KEY_UP:
+            angVelY += rotationSpeed;
+            break;
+        case GLFW_KEY_DOWN:
+            angVelY -= rotationSpeed;
+            break;
+        case GLFW_KEY_LEFT:
+            angVelX += rotationSpeed;
+            break;
+        case GLFW_KEY_RIGHT:
+            angVelX -= rotationSpeed;
+            break;
+        default:
             break;
         }
     }
@@ -76,6 +123,7 @@ int main(int argc, char **argv)
 {
     GLFWApplication app(APP_NAME, WINDOW_WIDTH, WINDOW_HEIGHT, V_MAJOR, V_MINOR);
     GLFWwindow *window = app.Init();
+    glfwSwapInterval(1);
     RenderCommands::EnableDepthTesting();
     RenderCommands::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
     int fbw, fbh;
@@ -143,9 +191,25 @@ int main(int argc, char **argv)
     cubeVertexBuffer->Unbind();
     cubeIndexBuffer->Unbind();
 
+    double lastTime = glfwGetTime();
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
+        double now = glfwGetTime();
+        float dt = static_cast<float>(now - lastTime);
+        lastTime = now;
+
+        angle_x += angVelX * dt;
+        angle_y += angVelY * dt;
+
+        auto wrap360 = [](float a)
+        {
+            a = std::fmod(a, 360.0f);
+            return (a < 0.0f) ? a + 360.0f : a;
+        };
+        angle_x = wrap360(angle_x);
+        angle_y = wrap360(angle_y);
+
         RenderCommands::Clear();
 
         // Draw grid/ chessboard

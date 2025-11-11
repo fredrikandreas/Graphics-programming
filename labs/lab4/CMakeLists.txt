@@ -1,11 +1,28 @@
-add_executable(lab4 main.cpp)
+project(lab4)
 
-target_include_directories(lab4 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(lab4 PRIVATE glfw)
-target_link_libraries(lab4 PRIVATE glad)
-target_link_libraries(lab4 PRIVATE glm)
-target_link_libraries(lab4 PRIVATE GLFWApplication)
-target_link_libraries(lab4 PRIVATE GeometricTools)
-target_link_libraries(lab4 PRIVATE Rendering)
-target_link_libraries(lab4 PRIVATE Shader)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm)
+target_link_libraries(${PROJECT_NAME} PRIVATE GLFWApplication)
+target_link_libraries(${PROJECT_NAME} PRIVATE GeometricTools)
+target_link_libraries(${PROJECT_NAME} PRIVATE Rendering)
+target_link_libraries(${PROJECT_NAME} PRIVATE Shader)
+
+add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/dirt_bottom.png
+  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/cube_texture.png)
+
+add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/resources/textures/dirt_top.png
+  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/floor_texture.png)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+  TEXTURES_DIR="${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/textures/")
