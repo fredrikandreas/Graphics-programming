@@ -14,6 +14,8 @@
 #include <PerspectiveCamera.h>
 #include <OrthographicCamera.h>
 #include <glm/glm.hpp>
+#include "glm/ext.hpp"
+#include "glm/gtx/string_cast.hpp"
 
 #include "GameCamera.h"
 #include "BoardRenderer.h"
@@ -84,6 +86,9 @@ int main(int, char **)
             boardCenter.x + rc * std::cos(azimuth),
             boardCenter.y + radius * std::sin(elevation),
             boardCenter.z + rc * std::sin(azimuth));
+
+        std::cout<<glm::to_string(eye)<<std::endl;
+
 
         // Apply orbit to your PerspectiveCamera
         cam.SetPosition(eye);
